@@ -7,8 +7,14 @@ import pygame
 
 from loaders import load_all_characters, tmx_importer
 from player import Player
+from dialogs import Dialog
+from npcs import Npc
+from loaders import load_all_characters
+from settings import *
+from os.path import join
 from settings import *
 from sprites import Sprites, Sprite, CollidableSprite, BorderSprite, AnimatedSprite
+from pygame.math import Vector2
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
@@ -19,10 +25,6 @@ class Game:
 		self.display_surface = pygame.display.set_mode((WIDTH, HEIGHT))
 		self.clock = pygame.time.Clock()
 
-		self.background = load_image("liquid.webp")
-		self.background = pygame.transform.scale2x(self.background)
-		self.background = pygame.transform.scale2x(self.background)
-
 		self.transition_target = None
 		self.tint_surf = pygame.Surface((WIDTH, HEIGHT))
 		self.tint_mode = 'untint'
@@ -30,26 +32,24 @@ class Game:
 		self.tint_direction = -1
 		self.tint_speed = 600
 
-		# spirtes
-		self.sprites = Sprites()
 		self.collision_sprites = pygame.sprite.Group()
 		self.character_sprites = pygame.sprite.Group()
 		self.transition_sprites = pygame.sprite.Group()
 
-		# transition / tint
-		self.transition_target = None
-		self.tint_surf = pygame.Surface((WIDTH, HEIGHT))
-		self.tint_mode = 'untint'
-		self.tint_progress = 0
-		self.tint_direction = -1
-		self.tint_speed = 600
+		self.sprites = Sprites()
+		self.dialog = None
 
 		self.load_assets()
-		self.import_assets()
 		self.setup(self.tmx_maps['world_map'], 'house')
 
-	def import_assets(self):
+		# self.player = Player(Vector2(0, 0), self.frames['characters']['fire_boss'], self.sprites, self.collision_sprites)
+		self.npc = Npc(Vector2(0, 100), self.frames['characters']['hat_girl'], self.sprites) 
+
+
+	def load_assets(self):
 		self.tmx_maps = tmx_importer('data', 'maps')
+
+		self.frames = { 'characters': load_all_characters('data', 'graphics', 'characters') }
 
 		self.fonts = {
 			'dialog': pygame.font.Font(join('data', 'graphics', 'fonts', 'PixeloidSans.ttf'), 30),
@@ -58,8 +58,6 @@ class Game:
 			'bold': pygame.font.Font(join('data', 'graphics', 'fonts', 'dogicapixelbold.otf'), 20),
 		}
 
-	def load_assets(self):
-		self.frames = { 'characters': load_all_characters('data', 'graphics', 'characters') }
 
 	def tint_screen(self, dt):
 		if self.tint_mode == 'untint':
@@ -121,8 +119,25 @@ class Game:
 					pygame.quit()
 					exit()
 
+			# Temporary dialog trigger, it should be moved to better place
+			# First we should check if NPC is in range of player
+			# Second we should check if player is pressing the right key
+			keys = pygame.key.get_pressed()
+			if not self.dialog and keys[pygame.K_w]:
+				self.dialog = Dialog(self.player, self.npc, self.sprites, self.fonts['dialog'])
+				self.player.blocked = True
+
+			if self.dialog and keys[pygame.K_ESCAPE]:
+				self.dialog.sprite.kill()
+				self.dialog = None
+				self.player.blocked = False
+
+			print(self.dialog, self.sprites)
+
 			self.sprites.update(dt)
 			self.sprites.draw(self.player)
+
+			if self.dialog: self.dialog.update()
 
 			self.tint_screen(dt)
 			pygame.display.update()
