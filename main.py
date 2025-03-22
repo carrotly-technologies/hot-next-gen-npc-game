@@ -16,6 +16,7 @@ from os.path import join
 from settings import *
 from sprites import Sprites, Sprite, CollidableSprite, BorderSprite, AnimatedSprite, TransitionSprite
 from pygame.math import Vector2
+from mocks import *
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
@@ -150,72 +151,7 @@ class Game:
 				if obj.properties['pos'] == player_start_pos:
 					self.player = Player((obj.x, obj.y), self.frames['characters']['fire_boss'], self.sprites, self.collision_sprites)
 			elif obj.name == 'NPC1':
-				dialog = [
-					{
-						"message": "Ah, greetings, traveler! Care to browse my wares? I've something truly unique today—though I'll need to trust you before I say more.",
-						"options": [
-							{
-								"text": "What's this unique item?",
-								"next": 1
-							},
-							{
-								"text": "I’m not interested.",
-								"finish": True
-							},
-							{
-								"text": "How much for your best item?",
-								"next": 2
-							}
-						]
-					},
-					{
-						"message": "It’s an ancient amulet said to glow under moonlight. Rare trinkets like this don’t come cheap, though—500 Carrotly Coins.",
-						"options": [
-							{
-								"text": "That’s too expensive. Can you go lower?",
-								"next": 3
-							},
-							{
-								"text": "Sounds intriguing. I'll take it!",
-								"finish": True
-							},
-							{
-								"text": "Forget it.",
-								"finish": True
-							}
-						]
-					},
-					{
-						"message": "Hmm, 500 Coins is already fair for such a rare artifact. But perhaps we can negotiate if you know its worth.",
-						"options": [
-							{
-								"text": "I’ve dealt with magical artifacts before. How about 400?",
-								"next": 4
-							},
-							{
-								"text": "Fine, I’ll pay 500.",
-								"finish": True
-							}
-						]
-					},
-					{
-						"message": "You drive a hard bargain. Let’s meet in the middle—450 Coins?",
-						"options": [
-							{
-								"text": "Deal!",
-								"finish": True
-							},
-							{
-								"text": "Still too high. I’ll pass.",
-								"finish": True
-							}
-						]
-					},
-					{
-						"message": "Your knowledge impresses me. 400 Coins it is—may it serve you well!",
-						"finish": True
-					}
-				]
+				dialog = DIALOGUE_3
 				self.npc = Npc((obj.x, obj.y), self.frames['characters']['hat_girl'], self.sprites, dialog)
 
 	def on_dialog_end(self):

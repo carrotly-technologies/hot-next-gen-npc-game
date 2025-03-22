@@ -11,15 +11,19 @@ class Dialog:
 
 		self.dialog = npc.dialog
 		self.on_end = on_end
+		self.timer = None 
 
 		self.npc_sprite = DialogNpc(self.dialog[0]['message'], self.npc, self.sprites, self.font)
-		self.player_sprite = DialogOptionsController(self.dialog[0]['options'], self.player, self.sprites, self.font)
-
-		self.timer = None 
+		
+		if 'options' in self.dialog[0] and self.dialog[0]['options']:
+			self.player_sprite = DialogOptionsController(self.dialog[0]['options'], self.player, self.sprites, self.font)
+		else:
+			self.player_sprite = None
+			self.timer = pygame.time.get_ticks() + 2000
 
 	def dispose(self):
 		self.npc_sprite.kill()
-		self.player_sprite.kill()
+		if self.player_sprite: self.player_sprite.kill()
 
 	def input(self):
 		keys = pygame.key.get_just_pressed()
