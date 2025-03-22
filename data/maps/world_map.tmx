@@ -61,7 +61,7 @@
 </data>
  </layer>
  <objectgroup id="2" name="Entities">
-  <object id="3" name="NPC1" x="2037.73" y="788.19">
+  <object id="3" name="NPC1" x="2528" y="1760">
    <point/>
   </object>
   <object id="4" name="NPC3" x="1994.81" y="2377.63">
