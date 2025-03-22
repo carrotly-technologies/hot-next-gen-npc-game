@@ -42,7 +42,7 @@ class Game:
 		self.load_assets()
 		self.setup(self.tmx_maps['world_map'], 'house')
 
-		self.player = Player(Vector2(0, 0), self.frames['characters']['fire_boss'], self.sprites)
+		# self.player = Player(Vector2(0, 0), self.frames['characters']['fire_boss'], self.sprites, self.collision_sprites)
 		self.npc = Npc(Vector2(0, 100), self.frames['characters']['hat_girl'], self.sprites) 
 
 
