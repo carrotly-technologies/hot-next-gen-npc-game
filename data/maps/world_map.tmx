@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="24">
- <tileset firstgid="1" source="../../../hot-ai-pocs/Python-Monsters/data/tilesets/world.tsx"/>
- <tileset firstgid="211" source="../../../hot-ai-pocs/Python-Monsters/data/tilesets/objects.tsx"/>
+ <tileset firstgid="1" source="../../tilesets/world.tsx"/>
+ <tileset firstgid="211" source="../../tilesets/objects.tsx"/>
  <layer id="1" name="Terrain" width="50" height="50">
   <data encoding="csv">
 0,0,0,0,0,5,5,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="64" tileheight="64" infinite="0" nextlayerid="7" nextobjectid="13">
- <tileset firstgid="1" source="../../../hot-ai-pocs/Python-Monsters/data/tilesets/indoor.tsx"/>
+ <tileset firstgid="1" source="../../tilesets/indoor.tsx"/>
  <layer id="1" name="water" width="15" height="15">
   <data encoding="csv">
 17,17,17,29,30,17,29,30,17,17,29,30,17,17,17,
