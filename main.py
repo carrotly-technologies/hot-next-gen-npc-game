@@ -126,10 +126,20 @@ class Game:
 					pygame.quit()
 					exit()
 
+			# Temporary dialog trigger, it should be moved to better place
+			# First we should check if NPC is in range of player
+			# Second we should check if player is pressing the right key
 			keys = pygame.key.get_pressed()
-			if keys[pygame.K_w]:
-				self.dialog = Dialog(self.player, npc, self.sprites, self.fonts['dialog'])
+			if not self.dialog and keys[pygame.K_w]:
+				self.dialog = Dialog(self.player, self.npc, self.sprites, self.fonts['dialog'])
 				self.player.blocked = True
+
+			if self.dialog and keys[pygame.K_ESCAPE]:
+				self.dialog.sprite.kill()
+				self.dialog = None
+				self.player.blocked = False
+
+			print(self.dialog, self.sprites)
 
 			self.sprites.update(dt)
 			self.sprites.draw(self.player)
