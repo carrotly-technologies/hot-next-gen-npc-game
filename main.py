@@ -13,7 +13,7 @@ from loaders import load_all_characters
 from settings import *
 from os.path import join
 from settings import *
-from sprites import Sprites, Sprite, CollidableSprite, BorderSprite, AnimatedSprite
+from sprites import Sprites, Sprite, CollidableSprite, BorderSprite, AnimatedSprite, TransitionSprite
 from pygame.math import Vector2
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
@@ -40,8 +40,7 @@ class Game:
 		self.dialog = None
 
 		self.load_assets()
-		self.setup(self.tmx_maps['world_map'], 'house')
-
+		self.setup(self.tmx_maps['world_map'], 'init')
 
 	def load_assets(self):
 		self.tmx_maps = tmx_importer('data', 'maps')
@@ -92,9 +91,9 @@ class Game:
 				CollidableSprite((obj.x, obj.y), obj.image, (self.sprites, self.collision_sprites))
 
 		# transition objects
-		# for obj in tmx_map.get_layer_by_name('Transition'):
-		# 	TransitionSprite((obj.x, obj.y), (obj.width, obj.height), (obj.properties['target'], obj.properties['pos']),
-		# 					 self.transition_sprites)
+		for obj in tmx_map.get_layer_by_name('Transition'):
+			TransitionSprite((obj.x, obj.y), (obj.width, obj.height), (obj.properties['target'], obj.properties['pos']),
+							 self.transition_sprites)
 
 		# collision objects
 		for obj in tmx_map.get_layer_by_name('Collisions'):
@@ -146,6 +145,13 @@ class Game:
 		self.dialog = None
 		self.player.blocked = False
 
+	def transition_check(self):
+		sprites = [sprite for sprite in self.transition_sprites if sprite.rect.colliderect(self.player.hitbox)]
+		if sprites:
+			# should block player but you know
+			self.transition_target = sprites[0].target
+			self.tint_mode = 'tint'
+
 	def run(self):
 		while True:
 			dt = self.clock.tick() / 1000
@@ -169,6 +175,8 @@ class Game:
 			# 	self.dialog = None
 			# 	self.player.blocked = False
 
+
+			self.transition_check()
 			self.sprites.update(dt)
 			self.sprites.draw(self.player)
 

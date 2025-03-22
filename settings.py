@@ -24,7 +24,7 @@ COLORS: dict[str: str] = {
 	'dark white': '#f0f0f0'
 }
 
-TILE_SIZE = 32
+TILE_SIZE = 64
 WIDTH = 1280
 HEIGHT = 720
 SPRITE_WIDTH = 80
