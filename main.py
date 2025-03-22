@@ -4,6 +4,7 @@ import os
 from os.path import join
 
 import pygame
+import xml.etree.ElementTree as ET
 
 from loaders import load_all_characters, tmx_importer
 from player import Player
@@ -42,6 +43,24 @@ class Game:
 		self.load_assets()
 		self.setup(self.tmx_maps['world_map'], 'init')
 
+		self.remixed_map_data = [
+			[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17],
+			[17, 29, 30, 17, 17, 17, 17, 17, 17, 17, 17, 17, 39, 40, 17],
+			[17, 17, 17, 9, 4, 4, 9, 4, 9, 4, 9, 9, 17, 17, 17],
+			[17, 17, 17, 4, 9, 4, 9, 4, 9, 4, 9, 4, 17, 17, 17],
+			[17, 17, 17, 9, 4, 9, 4, 4, 4, 9, 4, 9, 17, 17, 17],
+			[17, 17, 17, 4, 9, 4, 9, 4, 9, 4, 9, 4, 17, 17, 17],
+			[17, 17, 17, 9, 4, 9, 4, 9, 4, 9, 4, 9, 17, 17, 17],
+			[17, 17, 17, 4, 4, 4, 4, 4, 4, 4, 4, 4, 17, 17, 17],
+			[17, 17, 17, 9, 4, 9, 4, 9, 4, 9, 4, 9, 17, 17, 17],
+			[17, 17, 17, 4, 9, 4, 9, 4, 9, 4, 9, 4, 17, 17, 17],
+			[17, 17, 17, 9, 4, 9, 4, 9, 4, 9, 4, 9, 17, 17, 17],
+			[17, 17, 17, 4, 9, 4, 9, 4, 9, 4, 9, 4, 17, 17, 17],
+			[17, 24, 25, 17, 17, 17, 17, 17, 17, 17, 17, 17, 34, 35, 17],
+			[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17],
+			[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17]
+		]
+
 	def load_assets(self):
 		self.tmx_maps = tmx_importer('data', 'maps')
 
@@ -73,10 +92,36 @@ class Game:
 		self.tint_surf.set_alpha(self.tint_progress)
 		self.display_surface.blit(self.tint_surf, (0,0))
 
+	def save_patched_map(self, base_map_path, output_path):
+		# Load the base map from disk
+		tree = ET.parse(base_map_path)
+		root = tree.getroot()
+
+		# Find the terrain layer
+		for layer in root.findall("layer"):
+			if layer.attrib.get("name") == "Terrain":
+				data = layer.find("data")
+				if data is not None:
+					# Convert remixed data to CSV string
+					csv_string = "\n" + ",\n".join(
+						",".join(str(gid) for gid in row) for row in self.remixed_map_data
+					)
+					data.text = csv_string
+					break
+
+		# Save new patched file
+		tree.write(output_path)
+
 	def setup(self, tmx_map, player_start_pos):
 		# clear the map
 		for group in (self.sprites, self.collision_sprites, self.transition_sprites, self.character_sprites):
 			group.empty()
+
+		if player_start_pos == "house-in":
+			base_path = join('data', 'maps', 'room_map.tmx')
+			output_path = join('data', 'maps', 'patched_room_map.tmx')
+			self.save_patched_map(base_path, output_path)
+			tmx_map = tmx_importer('data', 'maps')['patched_room_map']
 
 		# terrain
 		for layer in ['Terrain']:
@@ -105,7 +150,6 @@ class Game:
 				if obj.properties['pos'] == player_start_pos:
 					self.player = Player((obj.x, obj.y), self.frames['characters']['fire_boss'], self.sprites, self.collision_sprites)
 			elif obj.name == 'NPC1':
-				# Temporarlily hardcoded dialog, but it should be managed dynamically by AI agent
 				dialog = [
 					{
 						"message": "Ah, greetings, traveler! Care to browse my wares? I've something truly unique today—though I'll need to trust you before I say more.",
@@ -212,7 +256,7 @@ class Game:
 
 			self.tint_screen(dt)
 			pygame.display.update()
-				
+
 def load_image(name):
 		path = os.path.join(main_dir, "data", name)
 		return pygame.image.load(path).convert()
