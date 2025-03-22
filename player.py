@@ -15,6 +15,7 @@ class Player(pygame.sprite.Sprite):
 		self.image = self.frames[self.get_state()][self.frame_index]
 
 		self.rect = self.image.get_frect(center = pos)
+		self.blocked = False
 
 	def input(self):
 		keys = pygame.key.get_pressed()
@@ -39,8 +40,10 @@ class Player(pygame.sprite.Sprite):
 
 	def update(self, dt):
 		self.input()
-		self.move(dt)
-		self.animate(dt)
+
+		if not self.blocked:
+			self.move(dt)
+			self.animate(dt)
 
 	def get_state(self):
 		moving = bool(self.direction)
