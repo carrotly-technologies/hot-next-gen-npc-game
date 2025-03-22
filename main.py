@@ -132,8 +132,6 @@ class Game:
 				self.dialog = None
 				self.player.blocked = False
 
-			print(self.dialog, self.sprites)
-
 			self.sprites.update(dt)
 			self.sprites.draw(self.player)
 
