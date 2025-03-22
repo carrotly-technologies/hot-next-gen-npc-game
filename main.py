@@ -170,11 +170,6 @@ class Game:
 				self.dialog = Dialog(self.player, self.npc, self.sprites, self.fonts['dialog'], self.on_dialog_end)
 				self.player.blocked = True
 
-			# if self.dialog and keys[pygame.K_ESCAPE]:
-			# 	self.dialog.dispose()
-			# 	self.dialog = None
-			# 	self.player.blocked = False
-
 
 			self.transition_check()
 			self.sprites.update(dt)
