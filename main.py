@@ -16,6 +16,7 @@ from os.path import join
 from settings import *
 from sprites import Sprites, Sprite, CollidableSprite, BorderSprite, AnimatedSprite, TransitionSprite
 from pygame.math import Vector2
+from mocks import *
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
@@ -150,35 +151,7 @@ class Game:
 				if obj.properties['pos'] == player_start_pos:
 					self.player = Player((obj.x, obj.y), self.frames['characters']['fire_boss'], self.sprites, self.collision_sprites)
 			elif obj.name == 'NPC1':
-				dialog = [
-					{
-						'message': 'Hello! How can I help you?',
-						'options': [
-							{ 'text': 'Nevermind, goodbye!', 'finish': True },
-							{ 'text': 'How are you?', 'next': 1 },
-							{ 'text': 'What is your name?', 'next': 2 }
-						]
-					},
-					{
-						'message': 'I am quite busy these days, but I am doing well. Unfortunately I cannot chat for now. Goodbye!',
-						'finish': True
-					},
-					{
-						'message': 'My name is John. What is your name?',
-						'options': [
-							{ 'text': 'I am Bob', 'next': 3 },
-							{ 'text': 'I am Alice', 'next': 4 },
-						]
-					},
-					{
-						'message': 'Nice to meet you Bob! Goodbye!',
-						'finish': True
-					},
-					{
-						'message': 'Nice to meet you Alice! Goodbye!',
-						'finish': True
-					}
-				]
+				dialog = DIALOGUE_3
 				self.npc = Npc((obj.x, obj.y), self.frames['characters']['hat_girl'], self.sprites, dialog)
 
 	def on_dialog_end(self):
@@ -221,9 +194,9 @@ class Game:
 			pygame.display.update()
 
 def load_image(name):
-    path = os.path.join(main_dir, "data", name)
-    return pygame.image.load(path).convert()
+		path = os.path.join(main_dir, "data", name)
+		return pygame.image.load(path).convert()
 
 if __name__ == "__main__":
-    game = Game()
-    game.run()
+		game = Game()
+		game.run()
