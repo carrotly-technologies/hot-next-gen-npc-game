@@ -13,7 +13,7 @@ from loaders import load_all_characters
 from settings import *
 from os.path import join
 from settings import *
-from sprites import Sprites, Sprite, CollidableSprite, BorderSprite
+from sprites import Sprites, Sprite, CollidableSprite, BorderSprite, AnimatedSprite
 from pygame.math import Vector2
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
@@ -87,13 +87,6 @@ class Game:
 			for x, y, surf in tmx_map.get_layer_by_name(layer).tiles():
 				Sprite((x * TILE_SIZE, y * TILE_SIZE), surf, self.sprites, WORLD_LAYERS['bg'])
 
-		# coast
-		# for obj in tmx_map.get_layer_by_name('Coast'):
-		# 	terrain = obj.properties['terrain']
-		# 	side = obj.properties['side']
-		# 	AnimatedSprite((obj.x, obj.y), self.overworld_frames['coast'][terrain][side], self.sprites,
-		# 				   WORLD_LAYERS['bg'])
-
 		# objects
 		for obj in tmx_map.get_layer_by_name('Objects'):
 			if obj.name == 'top':
@@ -114,7 +107,7 @@ class Game:
 		for obj in tmx_map.get_layer_by_name('Entities'):
 			if obj.name == 'Player':
 				if obj.properties['pos'] == player_start_pos:
-					self.player = Player((obj.x, obj.y), self.frames['characters']['fire_boss'], self.sprites)
+					self.player = Player((obj.x, obj.y), self.frames['characters']['fire_boss'], self.sprites, self.collision_sprites)
 
 	def run(self):
 		while True:
