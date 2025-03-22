@@ -108,142 +108,68 @@ class Game:
 				# Temporarlily hardcoded dialog, but it should be managed dynamically by AI agent
 				dialog = [
 					{
-						"message": "Greetings, traveler! What brings you to my humble stall today?",
+						"message": "Ah, greetings, traveler! Care to browse my wares? I've something truly unique today—though I'll need to trust you before I say more.",
 						"options": [
 							{
-								"text": "I heard you have a rare artifact for sale.",
-								"next": 1,
-								"finish": None
+								"text": "What's this unique item?",
+								"next": 1
 							},
 							{
-								"text": "Just browsing, thanks.",
-								"next": 2,
-								"finish": None
+								"text": "I’m not interested.",
+								"finish": True
+							},
+							{
+								"text": "How much for your best item?",
+								"next": 2
 							}
-						],
-						"finish": None
+						]
 					},
 					{
-						"message": "Ah, yes. I do have something special, but I must know if you can really appreciate its value.",
+						"message": "It’s an ancient amulet said to glow under moonlight. Rare trinkets like this don’t come cheap, though—500 Carrotly Coins.",
 						"options": [
 							{
-								"text": "Tell me more about it.",
-								"next": 3,
-								"finish": None
+								"text": "That’s too expensive. Can you go lower?",
+								"next": 3
 							},
 							{
-								"text": "How much are you asking for it?",
-								"next": 4,
-								"finish": None
-							}
-						],
-						"finish": None
-					},
-					{
-						"message": "Of course, take your time. Perhaps you'll find something that catches your eye.",
-						"options": [
-							{
-								"text": "What's this artifact you have?",
-								"next": 1,
-								"finish": None
+								"text": "Sounds intriguing. I'll take it!",
+								"finish": True
 							},
 							{
-								"text": "Thanks, I'll come back later.",
-								"next": 5,
+								"text": "Forget it.",
 								"finish": True
 							}
-						],
-						"finish": None
+						]
 					},
 					{
-						"message": "This artifact is said to be from the Desert of Whispers, with a tale shrouded in mystery and perhaps magic.",
+						"message": "Hmm, 500 Coins is already fair for such a rare artifact. But perhaps we can negotiate if you know its worth.",
 						"options": [
 							{
-								"text": "What do you mean by magic?",
-								"next": 6,
-								"finish": None
+								"text": "I’ve dealt with magical artifacts before. How about 400?",
+								"next": 4
 							},
 							{
-								"text": "Sounds intriguing. How much?",
-								"next": 4,
-								"finish": None
-							}
-						],
-						"finish": None
-					},
-					{
-						"message": "The price starts at 500 gold, but I'm open to negotiation if you're truly interested.",
-						"options": [
-							{
-								"text": "That's steep. Can you go lower?",
-								"next": 7,
-								"finish": None
-							},
-							{
-								"text": "I'll take it for 500 gold.",
-								"next": 8,
+								"text": "Fine, I’ll pay 500.",
 								"finish": True
 							}
-						],
-						"finish": None
+						]
 					},
 					{
-						"message": "Safe travels, then! I'll be here when you return.",
-						"options": None,
+						"message": "You drive a hard bargain. Let’s meet in the middle—450 Coins?",
+						"options": [
+							{
+								"text": "Deal!",
+								"finish": True
+							},
+							{
+								"text": "Still too high. I’ll pass.",
+								"finish": True
+							}
+						]
+					},
+					{
+						"message": "Your knowledge impresses me. 400 Coins it is—may it serve you well!",
 						"finish": True
-					},
-					{
-						"message": "Magic is a rare commodity these days. The artifact may possess unusual properties.",
-						"options": [
-							{
-								"text": "Can you prove it has magic?",
-								"next": 9,
-								"finish": None
-							},
-							{
-								"text": "Alright, how much is it again?",
-								"next": 4,
-								"finish": None
-							}
-						],
-						"finish": None
-					},
-					{
-						"message": "If you can offer 350 gold, it might just be yours.",
-						"options": [
-							{
-								"text": "Deal at 350 gold.",
-								"next": 8,
-								"finish": True
-							},
-							{
-								"text": "I need to think about it.",
-								"next": 5,
-								"finish": True
-							}
-						],
-						"finish": None
-					},
-					{
-						"message": "Pleasure doing business with you! May the artifact serve you well.",
-						"options": None,
-						"finish": True
-					},
-					{
-						"message": "I'm afraid you'll have to take me at my word—such things aren't easily demonstrated in public streets.",
-						"options": [
-							{
-								"text": "Alright, I'll buy it for 350 gold.",
-								"next": 8,
-								"finish": True
-							},
-							{
-								"text": "I'll pass for now.",
-								"next": 5,
-								"finish": True
-							}
-						],
-						"finish": None
 					}
 				]
 				self.npc = Npc((obj.x, obj.y), self.frames['characters']['hat_girl'], self.sprites, dialog)
