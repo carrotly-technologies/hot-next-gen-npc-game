@@ -1,7 +1,7 @@
 import pygame
 
 class Npc(pygame.sprite.Sprite):
-	def __init__(self, pos, frames, sprites):
+	def __init__(self, pos, frames, sprites, dialog):
 		super().__init__(sprites)
 		
 		self.pos = pos
@@ -11,3 +11,4 @@ class Npc(pygame.sprite.Sprite):
 		self.image = self.frames["down"][0]
 
 		self.rect = self.image.get_frect(center = pos)
+		self.dialog = dialog
