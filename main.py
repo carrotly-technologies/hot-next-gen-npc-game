@@ -32,6 +32,10 @@ class Game:
 		self.tint_direction = -1
 		self.tint_speed = 600
 
+		self.collision_sprites = pygame.sprite.Group()
+		self.character_sprites = pygame.sprite.Group()
+		self.transition_sprites = pygame.sprite.Group()
+
 		self.sprites = Sprites()
 		self.dialog = None
 
@@ -40,10 +44,6 @@ class Game:
 
 		self.player = Player(Vector2(0, 0), self.frames['characters']['fire_boss'], self.sprites)
 		self.npc = Npc(Vector2(0, 100), self.frames['characters']['hat_girl'], self.sprites) 
-
-		self.collision_sprites = pygame.sprite.Group()
-		self.character_sprites = pygame.sprite.Group()
-		self.transition_sprites = pygame.sprite.Group()
 
 
 	def load_assets(self):
