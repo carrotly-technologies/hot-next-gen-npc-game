@@ -108,31 +108,142 @@ class Game:
 				# Temporarlily hardcoded dialog, but it should be managed dynamically by AI agent
 				dialog = [
 					{
-						'message': 'Hello! How can I help you?',
-						'options': [
-							{ 'text': 'Nevermind, goodbye!', 'finish': True },
-							{ 'text': 'How are you?', 'next': 1 },
-							{ 'text': 'What is your name?', 'next': 2 }
-						]
+						"message": "Greetings, traveler! What brings you to my humble stall today?",
+						"options": [
+							{
+								"text": "I heard you have a rare artifact for sale.",
+								"next": 1,
+								"finish": None
+							},
+							{
+								"text": "Just browsing, thanks.",
+								"next": 2,
+								"finish": None
+							}
+						],
+						"finish": None
 					},
 					{
-						'message': 'I am quite busy these days, but I am doing well. Unfortunately I cannot chat for now. Goodbye!',
-						'finish': True
+						"message": "Ah, yes. I do have something special, but I must know if you can really appreciate its value.",
+						"options": [
+							{
+								"text": "Tell me more about it.",
+								"next": 3,
+								"finish": None
+							},
+							{
+								"text": "How much are you asking for it?",
+								"next": 4,
+								"finish": None
+							}
+						],
+						"finish": None
 					},
 					{
-						'message': 'My name is John. What is your name?',
-						'options': [
-							{ 'text': 'I am Bob', 'next': 3 },
-							{ 'text': 'I am Alice', 'next': 4 },
-						]
+						"message": "Of course, take your time. Perhaps you'll find something that catches your eye.",
+						"options": [
+							{
+								"text": "What's this artifact you have?",
+								"next": 1,
+								"finish": None
+							},
+							{
+								"text": "Thanks, I'll come back later.",
+								"next": 5,
+								"finish": True
+							}
+						],
+						"finish": None
 					},
 					{
-						'message': 'Nice to meet you Bob! Goodbye!',
-						'finish': True
+						"message": "This artifact is said to be from the Desert of Whispers, with a tale shrouded in mystery and perhaps magic.",
+						"options": [
+							{
+								"text": "What do you mean by magic?",
+								"next": 6,
+								"finish": None
+							},
+							{
+								"text": "Sounds intriguing. How much?",
+								"next": 4,
+								"finish": None
+							}
+						],
+						"finish": None
 					},
 					{
-						'message': 'Nice to meet you Alice! Goodbye!',
-						'finish': True
+						"message": "The price starts at 500 gold, but I'm open to negotiation if you're truly interested.",
+						"options": [
+							{
+								"text": "That's steep. Can you go lower?",
+								"next": 7,
+								"finish": None
+							},
+							{
+								"text": "I'll take it for 500 gold.",
+								"next": 8,
+								"finish": True
+							}
+						],
+						"finish": None
+					},
+					{
+						"message": "Safe travels, then! I'll be here when you return.",
+						"options": None,
+						"finish": True
+					},
+					{
+						"message": "Magic is a rare commodity these days. The artifact may possess unusual properties.",
+						"options": [
+							{
+								"text": "Can you prove it has magic?",
+								"next": 9,
+								"finish": None
+							},
+							{
+								"text": "Alright, how much is it again?",
+								"next": 4,
+								"finish": None
+							}
+						],
+						"finish": None
+					},
+					{
+						"message": "If you can offer 350 gold, it might just be yours.",
+						"options": [
+							{
+								"text": "Deal at 350 gold.",
+								"next": 8,
+								"finish": True
+							},
+							{
+								"text": "I need to think about it.",
+								"next": 5,
+								"finish": True
+							}
+						],
+						"finish": None
+					},
+					{
+						"message": "Pleasure doing business with you! May the artifact serve you well.",
+						"options": None,
+						"finish": True
+					},
+					{
+						"message": "I'm afraid you'll have to take me at my word—such things aren't easily demonstrated in public streets.",
+						"options": [
+							{
+								"text": "Alright, I'll buy it for 350 gold.",
+								"next": 8,
+								"finish": True
+							},
+							{
+								"text": "I'll pass for now.",
+								"next": 5,
+								"finish": True
+							}
+						],
+						"finish": None
 					}
 				]
 				self.npc = Npc((obj.x, obj.y), self.frames['characters']['hat_girl'], self.sprites, dialog)
@@ -175,11 +286,11 @@ class Game:
 
 			self.tint_screen(dt)
 			pygame.display.update()
-        
+				
 def load_image(name):
-    path = os.path.join(main_dir, "data", name)
-    return pygame.image.load(path).convert()
+		path = os.path.join(main_dir, "data", name)
+		return pygame.image.load(path).convert()
 
 if __name__ == "__main__":
-    game = Game()
-    game.run()
+		game = Game()
+		game.run()

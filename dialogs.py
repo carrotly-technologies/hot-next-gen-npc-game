@@ -25,14 +25,14 @@ class Dialog:
 		keys = pygame.key.get_just_pressed()
 		if keys[pygame.K_RETURN]:
 			option = self.player_sprite.get_selected_option()
-			if 'finish' in option:
+			if 'finish' in option and option['finish']:
 				self.dispose()
 				self.on_end()
 			else:
 				self.dispose()
 				dialog = self.dialog[option['next']]
 
-				if 'finish' in dialog:
+				if 'finish' in dialog and dialog['finish']:
 					self.npc_sprite = DialogNpc(dialog['message'], self.npc, self.sprites, self.font)
 					self.timer = pygame.time.get_ticks() + 2000
 				else:
@@ -48,23 +48,6 @@ class Dialog:
 			self.dispose()
 			self.on_end()
 			self.timer = None  
-
-# class DialogNpc(pygame.sprite.Sprite):
-# 	def __init__(self, message, npc, sprites, font):
-# 		super().__init__(sprites)
-		
-# 		text = font.render(message, False, '#000000')
-# 		padding = 5
-# 		width = max(30, text.get_width() + padding * 2)
-# 		height = text.get_height() + padding * 2
-
-# 		surf = pygame.Surface((width, height), pygame.SRCALPHA)
-# 		surf.fill((0,0,0,0))
-# 		pygame.draw.rect(surf, '#ffffff', surf.get_frect(topleft = (0,0)),0, 4)
-# 		surf.blit(text, text.get_frect(center = (width / 2, height / 2)))
-
-# 		self.image = surf
-# 		self.rect = self.image.get_frect(midbottom = npc.rect.midtop + Vector2(0,-10))
 
 class DialogNpc(pygame.sprite.Sprite):
 	def __init__(self, message, npc, sprites, font):
@@ -160,8 +143,7 @@ class DialogOptionsController(pygame.sprite.Sprite):
 		self.key_down_pressed = False
 		self.key_select_pressed = False
 		
-		screen_width, screen_height = pygame.display.get_surface().get_size()
-		margin = 10
+		_, screen_height = pygame.display.get_surface().get_size()
 		padding = 5
 		option_height = font.get_linesize() + padding * 2
 		total_height = option_height * len(options)
