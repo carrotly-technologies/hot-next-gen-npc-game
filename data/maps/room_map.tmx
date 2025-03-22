@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="64" tileheight="64" infinite="0" nextlayerid="7" nextobjectid="13">
+ <tileset firstgid="1" source="../tilesets/indoor.tsx"/>
+ <layer id="1" name="water" width="15" height="15">
+  <data encoding="csv">
+17,17,17,29,30,17,29,30,17,17,29,30,17,17,17,
+17,17,17,39,40,17,39,40,17,17,39,40,17,17,17,
+17,17,9,9,9,9,9,9,9,9,9,9,9,17,17,
+17,17,9,9,9,9,9,9,9,9,9,9,9,17,17,
+17,17,9,9,9,9,9,9,9,9,9,9,9,17,17,
+17,17,9,9,9,9,9,9,9,9,9,9,9,17,17,
+17,17,9,9,4,4,4,4,4,4,4,9,9,17,17,
+17,17,9,9,4,4,4,4,4,4,4,9,9,17,17,
+17,17,9,9,4,4,4,5,4,4,4,9,9,17,17,
+17,17,9,9,9,9,4,5,9,9,9,9,9,17,17,
+17,17,9,9,9,9,4,5,9,9,9,9,9,17,17,
+17,17,9,9,9,9,4,5,9,9,9,9,9,17,17,
+17,17,9,9,9,9,4,5,9,9,9,9,9,17,17,
+17,17,17,17,17,17,14,15,17,17,17,17,17,17,17,
+17,17,17,17,17,17,17,17,17,17,17,17,17,17,17
+</data>
+ </layer>
+ <objectgroup id="3" name="Collisions">
+  <object id="4" x="-18.6887" y="-10.6793" width="149.51" height="957.13"/>
+  <object id="5" x="-38.7124" y="-24.0284" width="1085.28" height="150.845"/>
+  <object id="7" x="819.634" y="-64.0756" width="166.864" height="1037.22"/>
+  <object id="8" x="129.486" y="822.304" width="246.958" height="152.18"/>
+  <object id="9" x="520.615" y="822.304" width="361.76" height="169.533"/>
+  <object id="10" x="352.416" y="897.059" width="226.935" height="74.7549"/>
+ </objectgroup>
+ <objectgroup id="6" name="Transitions">
+  <object id="11" x="389.794" y="816.964" width="114.802" height="34.7076"/>
+ </objectgroup>
+ <objectgroup id="4" name="Coast"/>
+ <objectgroup id="5" name="Entities">
+  <object id="1" name="Player" x="444.525" y="794.271">
+   <point/>
+  </object>
+  <object id="2" name="NPC4" x="444.525" y="403.143">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="2" name="Objects"/>
+</map>
