@@ -110,33 +110,29 @@ class Game:
 					{
 						'message': 'Hello! How can I help you?',
 						'options': [
-							{ 'text': 'Nevermind, goodbye!', 'next': 1 },
-							{ 'text': 'How are you?', 'next': 2 },
-							{ 'text': 'What is your name?', 'next': 3 }
+							{ 'text': 'Nevermind, goodbye!', 'finish': True },
+							{ 'text': 'How are you?', 'next': 1 },
+							{ 'text': 'What is your name?', 'next': 2 }
 						]
 					},
 					{
-						'message': 'Goodbye!',
-						'end': True
-					},
-					{
 						'message': 'I am quite busy these days, but I am doing well. Unfortunately I cannot chat for now. Goodbye!',
-						'end': True
+						'finish': True
 					},
 					{
 						'message': 'My name is John. What is your name?',
 						'options': [
-							{ 'text': 'I am Bob', 'next': 4 },
-							{ 'text': 'I am Alice', 'next': 5 },
+							{ 'text': 'I am Bob', 'next': 3 },
+							{ 'text': 'I am Alice', 'next': 4 },
 						]
 					},
 					{
 						'message': 'Nice to meet you Bob! Goodbye!',
-						'end': True
+						'finish': True
 					},
 					{
 						'message': 'Nice to meet you Alice! Goodbye!',
-						'end': True
+						'finish': True
 					}
 				]
 				self.npc = Npc((obj.x, obj.y), self.frames['characters']['hat_girl'], self.sprites, dialog)

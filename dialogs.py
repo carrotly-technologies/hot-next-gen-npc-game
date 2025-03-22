@@ -15,49 +15,102 @@ class Dialog:
 		self.npc_sprite = DialogNpc(self.dialog[0]['message'], self.npc, self.sprites, self.font)
 		self.player_sprite = DialogOptionsController(self.dialog[0]['options'], self.player, self.sprites, self.font)
 
+		self.timer = None 
+
 	def dispose(self):
 		self.npc_sprite.kill()
 		self.player_sprite.kill()
-		self.dialog = None
-		self.on_end()
 
 	def input(self):
 		keys = pygame.key.get_just_pressed()
 		if keys[pygame.K_RETURN]:
 			option = self.player_sprite.get_selected_option()
-			dialog = self.dialog[option['next']]
-
-			self.npc_sprite.kill()
-			self.player_sprite.kill()
-
-			self.npc_sprite = DialogNpc(dialog['message'], self.npc, self.sprites, self.font)
-			
-			if 'options' in dialog:
-				self.player_sprite = DialogOptionsController(dialog['options'], self.player, self.sprites, self.font)
+			if 'finish' in option:
+				self.dispose()
+				self.on_end()
 			else:
-				self.player_sprite = DialogOptionsController([], self.player, self.sprites, self.font)
+				self.dispose()
+				dialog = self.dialog[option['next']]
+
+				if 'finish' in dialog:
+					self.npc_sprite = DialogNpc(dialog['message'], self.npc, self.sprites, self.font)
+					self.timer = pygame.time.get_ticks() + 2000
+				else:
+					self.player_sprite = DialogOptionsController(dialog['options'], self.player, self.sprites, self.font)
+					self.npc_sprite = DialogNpc(dialog['message'], self.npc, self.sprites, self.font)
 
 	def update(self):
 		self.input()
-		self.player_sprite.input()
+		if self.player_sprite:
+			self.player_sprite.input()
 
+		if self.timer and pygame.time.get_ticks() >= self.timer:
+			self.dispose()
+			self.on_end()
+			self.timer = None  
+
+# class DialogNpc(pygame.sprite.Sprite):
+# 	def __init__(self, message, npc, sprites, font):
+# 		super().__init__(sprites)
+		
+# 		text = font.render(message, False, '#000000')
+# 		padding = 5
+# 		width = max(30, text.get_width() + padding * 2)
+# 		height = text.get_height() + padding * 2
+
+# 		surf = pygame.Surface((width, height), pygame.SRCALPHA)
+# 		surf.fill((0,0,0,0))
+# 		pygame.draw.rect(surf, '#ffffff', surf.get_frect(topleft = (0,0)),0, 4)
+# 		surf.blit(text, text.get_frect(center = (width / 2, height / 2)))
+
+# 		self.image = surf
+# 		self.rect = self.image.get_frect(midbottom = npc.rect.midtop + Vector2(0,-10))
 
 class DialogNpc(pygame.sprite.Sprite):
 	def __init__(self, message, npc, sprites, font):
 		super().__init__(sprites)
 		
-		text = font.render(message, False, '#000000')
+		max_width = 500  # Maximum width in pixels for the dialog frame
 		padding = 5
-		width = max(30, text.get_width() + padding * 2)
-		height = text.get_height() + padding * 2
-
+		
+		# Split message into words
+		words = message.split(' ')
+		lines = []
+		current_line = words[0]
+		
+		# Create lines that fit within max_width
+		for word in words[1:]:
+			test_line = current_line + ' ' + word
+			test_width = font.size(test_line)[0]
+			
+			if test_width + padding * 2 <= max_width:
+				current_line = test_line
+			else:
+				lines.append(current_line)
+				current_line = word
+		
+		lines.append(current_line)  # Add the last line
+		
+		# Render each line of text
+		rendered_lines = [font.render(line, False, '#000000') for line in lines]
+		
+		# Calculate dialog dimensions
+		line_height = font.get_height()
+		width = max(30, min(max_width, max(line.get_width() for line in rendered_lines) + padding * 2))
+		height = len(lines) * line_height + padding * 2
+		
+		# Create the dialog surface
 		surf = pygame.Surface((width, height), pygame.SRCALPHA)
-		surf.fill((0,0,0,0))
-		pygame.draw.rect(surf, '#ffffff', surf.get_frect(topleft = (0,0)),0, 4)
-		surf.blit(text, text.get_frect(center = (width / 2, height / 2)))
-
+		surf.fill((0, 0, 0, 0))
+		pygame.draw.rect(surf, '#ffffff', surf.get_frect(topleft=(0, 0)), 0, 4)
+		
+		# Blit each line onto the dialog surface
+		for i, line in enumerate(rendered_lines):
+			y_pos = padding + i * line_height
+			surf.blit(line, line.get_frect(midtop=(width / 2, y_pos)))
+		
 		self.image = surf
-		self.rect = self.image.get_frect(midbottom = npc.rect.midtop + Vector2(0,-10))
+		self.rect = self.image.get_frect(midbottom=npc.rect.midtop + Vector2(0, -10))
 
 class DialogOption(pygame.sprite.Sprite):
 	def __init__(self, option, position, font, sprites, is_active=False):
