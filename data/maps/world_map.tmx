@@ -94,7 +94,7 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="3" name="Collisions">
+ <objectgroup id="3" name="Collisions" visible="0">
   <object id="48" x="820" y="1172" width="356" height="20"/>
   <object id="49" x="1164" y="1192" width="36" height="272"/>
   <object id="50" x="804" y="1360" width="200" height="28"/>
