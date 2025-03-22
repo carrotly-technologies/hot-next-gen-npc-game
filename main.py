@@ -42,9 +42,6 @@ class Game:
 		self.load_assets()
 		self.setup(self.tmx_maps['world_map'], 'house')
 
-		# self.player = Player(Vector2(0, 0), self.frames['characters']['fire_boss'], self.sprites, self.collision_sprites)
-		self.npc = Npc(Vector2(0, 100), self.frames['characters']['hat_girl'], self.sprites) 
-
 
 	def load_assets(self):
 		self.tmx_maps = tmx_importer('data', 'maps')
@@ -108,6 +105,46 @@ class Game:
 			if obj.name == 'Player':
 				if obj.properties['pos'] == player_start_pos:
 					self.player = Player((obj.x, obj.y), self.frames['characters']['fire_boss'], self.sprites, self.collision_sprites)
+			elif obj.name == 'NPC1':
+				# Temporarlily hardcoded dialog, but it should be managed dynamically by AI agent
+				dialog = [
+					{
+						'message': 'Hello! How can I help you?',
+						'options': [
+							{ 'text': 'Nevermind, goodbye!', 'next': 1 },
+							{ 'text': 'How are you?', 'next': 2 },
+							{ 'text': 'What is your name?', 'next': 3 }
+						]
+					},
+					{
+						'message': 'Goodbye!',
+						'end': True
+					},
+					{
+						'message': 'I am quite busy these days, but I am doing well. Unfortunately I cannot chat for now. Goodbye!',
+						'end': True
+					},
+					{
+						'message': 'My name is John. What is your name?',
+						'options': [
+							{ 'text': 'I am Bob', 'next': 4 },
+							{ 'text': 'I am Alice', 'next': 5 },
+						]
+					},
+					{
+						'message': 'Nice to meet you Bob! Goodbye!',
+						'end': True
+					},
+					{
+						'message': 'Nice to meet you Alice! Goodbye!',
+						'end': True
+					}
+				]
+				self.npc = Npc((obj.x, obj.y), self.frames['characters']['hat_girl'], self.sprites, dialog)
+
+	def on_dialog_end(self):
+		self.dialog = None
+		self.player.blocked = False
 
 	def run(self):
 		while True:
@@ -124,13 +161,13 @@ class Game:
 			# Second we should check if player is pressing the right key
 			keys = pygame.key.get_pressed()
 			if not self.dialog and keys[pygame.K_w]:
-				self.dialog = Dialog(self.player, self.npc, self.sprites, self.fonts['dialog'])
+				self.dialog = Dialog(self.player, self.npc, self.sprites, self.fonts['dialog'], self.on_dialog_end)
 				self.player.blocked = True
 
-			if self.dialog and keys[pygame.K_ESCAPE]:
-				self.dialog.sprite.kill()
-				self.dialog = None
-				self.player.blocked = False
+			# if self.dialog and keys[pygame.K_ESCAPE]:
+			# 	self.dialog.dispose()
+			# 	self.dialog = None
+			# 	self.player.blocked = False
 
 			self.sprites.update(dt)
 			self.sprites.draw(self.player)
