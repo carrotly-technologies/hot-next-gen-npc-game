@@ -37,3 +37,19 @@ def load_all_characters(*path):
 			image_name = image.split('.')[0]
 			new_dict[image_name] = load_character(4,4,*path, image_name)
 	return new_dict
+
+def tmx_importer(*path):
+	tmx_dict = {}
+	for folder_path, sub_folders, file_names in walk(join(*path)):
+		for file in file_names:
+			tmx_dict[file.split('.')[0]] = load_pygame(join(folder_path, file))
+	return tmx_dict
+
+def import_folder(*path):
+	frames = []
+	for folder_path, sub_folders, image_names in walk(join(*path)):
+		for image_name in sorted(image_names, key = lambda name: int(name.split('.')[0])):
+			full_path = join(folder_path, image_name)
+			surf = pygame.image.load(full_path).convert_alpha()
+			frames.append(surf)
+	return frames
