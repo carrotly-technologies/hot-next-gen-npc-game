@@ -14,106 +14,78 @@ error codes.
 
 import os
 import pygame
+from pygame.math import Vector2
+from player import Player
+from sprites import Sprites
+from loaders import load_all_characters
+from settings import *
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
-# Height and Width of screen
-WIDTH = 640
-HEIGHT = 480
-# Height and width of the sprite
-SPRITE_WIDTH = 80
-SPRITE_HEIGHT = 60
+class Game:
+	def __init__(self):
+		pygame.init()
+		pygame.display.set_caption('Hack of Tomorrow')
+		self.display_surface = pygame.display.set_mode((WIDTH, HEIGHT))
+		self.clock = pygame.time.Clock()
 
+		self.background = load_image("liquid.webp")
+		self.background = pygame.transform.scale2x(self.background)
+		self.background = pygame.transform.scale2x(self.background)
 
-# our game object class
-class GameObject:
-    def __init__(self, image, height, speed):
-        self.speed = speed
-        self.image = image
-        self.pos = image.get_rect().move(0, height)
+		self.transition_target = None
+		self.tint_surf = pygame.Surface((WIDTH, HEIGHT))
+		self.tint_mode = 'untint'
+		self.tint_progress = 0
+		self.tint_direction = -1
+		self.tint_speed = 600
 
-    # move the object.
-    def move(self, up=False, down=False, left=False, right=False):
-        if right:
-            self.pos.right += self.speed
-        if left:
-            self.pos.right -= self.speed
-        if down:
-            self.pos.top += self.speed
-        if up:
-            self.pos.top -= self.speed
+		self.sprites = Sprites()
 
-        # controls the object such that it cannot leave the screen's viewpoint
-        if self.pos.right > WIDTH:
-            self.pos.left = 0
-        if self.pos.top > HEIGHT - SPRITE_HEIGHT:
-            self.pos.top = 0
-        if self.pos.right < SPRITE_WIDTH:
-            self.pos.right = WIDTH
-        if self.pos.top < 0:
-            self.pos.top = HEIGHT - SPRITE_HEIGHT
+		self.load_assets()
+		self.player = Player(Vector2(0, 0), self.frames['characters']['fire_boss'], self.sprites)
 
+	def load_assets(self):
+		self.frames = { 'characters': load_all_characters('data', 'graphics', 'characters') }
 
-# quick function to load an image
+	def tint_screen(self, dt):
+		if self.tint_mode == 'untint':
+			self.tint_progress -= self.tint_speed * dt
+
+		if self.tint_mode == 'tint':
+			self.tint_progress += self.tint_speed * dt
+			if self.tint_progress >= 255:
+				if self.transition_target == 'level':
+					self.battle = None
+				else:
+					self.setup(self.tmx_maps[self.transition_target[0]], self.transition_target[1])
+				self.tint_mode = 'untint'
+				self.transition_target = None
+
+		self.tint_progress = max(0, min(self.tint_progress, 255))
+		self.tint_surf.set_alpha(self.tint_progress)
+		self.display_surface.blit(self.tint_surf, (0,0))
+
+	def run(self):
+		while True:
+			dt = self.clock.tick() / 1000
+			self.display_surface.fill('black')
+
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					pygame.quit()
+					exit()
+
+			self.sprites.update(dt)
+			self.sprites.draw(self.player)
+
+			self.tint_screen(dt)
+			pygame.display.update()
+        
 def load_image(name):
     path = os.path.join(main_dir, "data", name)
     return pygame.image.load(path).convert()
 
-
-# here's the full code
-def main():
-    pygame.init()
-    clock = pygame.Clock()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-
-    player = load_image("player1.gif")
-    entity = load_image("alien1.gif")
-    background = load_image("liquid.webp")
-
-    # scale the background image so that it fills the window and
-    # successfully overwrites the old sprite position.
-    background = pygame.transform.scale2x(background)
-    background = pygame.transform.scale2x(background)
-
-    screen.blit(background, (0, 0))
-
-    objects = []
-    p = GameObject(player, 10, 3)
-    for x in range(10):
-        o = GameObject(entity, x * 40, x)
-        objects.append(o)
-
-    pygame.display.set_caption("Move It!")
-
-    # This is a simple event handler that enables player input.
-    while True:
-        # Get all keys currently pressed, and move when an arrow key is held.
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:
-            p.move(up=True)
-        if keys[pygame.K_DOWN]:
-            p.move(down=True)
-        if keys[pygame.K_LEFT]:
-            p.move(left=True)
-        if keys[pygame.K_RIGHT]:
-            p.move(right=True)
-
-        # Draw the background
-        screen.blit(background, (0, 0))
-        for e in pygame.event.get():
-            # quit upon screen exit
-            if e.type == pygame.QUIT:
-                return
-        for o in objects:
-            screen.blit(background, o.pos, o.pos)
-        for o in objects:
-            o.move(right=True)
-            screen.blit(o.image, o.pos)
-        screen.blit(p.image, p.pos)
-        pygame.display.update()
-        clock.tick(60)
-
-
 if __name__ == "__main__":
-    main()
-    pygame.quit()
+    game = Game()
+    game.run()
