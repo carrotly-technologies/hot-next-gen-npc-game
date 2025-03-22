@@ -3,9 +3,9 @@
  <tileset firstgid="1" source="../tilesets/world.tsx"/>
  <tileset firstgid="211" source="../tilesets/objects.tsx"/>
  <tileset firstgid="242" source="../tilesets/Grass.tsx"/>
- <tileset firstgid="245" source="../../../hot-ai-pocs/Python-Monsters/data/tilesets/world.tsx"/>
- <tileset firstgid="455" source="../../../hot-ai-pocs/Python-Monsters/data/tilesets/objects.tsx"/>
- <tileset firstgid="486" source="../../../hot-ai-pocs/Python-Monsters/data/tilesets/Grass.tsx"/>
+ <tileset firstgid="245" source="../tilesets/world.tsx"/>
+ <tileset firstgid="455" source="../tilesets/objects.tsx"/>
+ <tileset firstgid="486" source="../tilesets/Grass.tsx"/>
  <layer id="1" name="Terrain" width="50" height="50">
   <data encoding="csv">
 195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,195,
