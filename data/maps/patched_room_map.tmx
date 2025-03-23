@@ -1,0 +1,142 @@
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="64" tileheight="64" infinite="0" nextlayerid="7" nextobjectid="232">
+ <tileset firstgid="1" source="../tilesets/indoor.tsx" />
+ <tileset firstgid="91" source="../tilesets/indoor.tsx" />
+ <tileset firstgid="181" source="../tilesets/floors_walls.tsx" />
+ <tileset firstgid="189" name="furnitures" tilewidth="16" tileheight="16" tilecount="234" columns="13">
+  <image source="../graphics/tilesets/interior/furnitures.png" width="208" height="288" />
+ </tileset>
+ <tileset firstgid="423" source="../tilesets/furnitures.tsx" />
+ <tileset firstgid="657" source="../tilesets/new_furniturews.tsx" />
+ <tileset firstgid="891" source="../tilesets/furnitures.tsx" />
+ <layer id="1" name="Terrain" width="15" height="15">
+  <data encoding="csv">
+17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,
+17,29,30,17,17,17,17,17,17,17,17,17,39,40,17,
+17,17,17,9,4,4,9,4,9,4,9,9,17,17,17,
+17,17,17,4,9,4,9,4,9,4,9,4,17,17,17,
+17,17,17,9,4,9,4,4,4,9,4,9,17,17,17,
+17,17,17,4,9,4,9,4,9,4,9,4,17,17,17,
+17,17,17,9,4,9,4,9,4,9,4,9,17,17,17,
+17,17,17,4,4,4,4,4,4,4,4,4,17,17,17,
+17,17,17,9,4,9,4,9,4,9,4,9,17,17,17,
+17,17,17,4,9,4,9,4,9,4,9,4,17,17,17,
+17,17,17,9,4,9,4,9,4,9,4,9,17,17,17,
+17,17,17,4,9,4,9,4,9,4,9,4,17,17,17,
+17,24,25,17,17,17,17,17,17,17,17,17,34,35,17,
+17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,
+17,17,17,17,17,17,17,17,17,17,17,17,17,17,17</data>
+ </layer>
+ <objectgroup id="3" name="Collisions">
+  <object id="4" x="-18.6887" y="-10.6793" width="149.51" height="957.13" />
+  <object id="5" x="-38.7124" y="-24.0284" width="1085.28" height="150.845" />
+  <object id="7" x="819.634" y="-64.0756" width="166.864" height="1037.22" />
+  <object id="8" x="129.486" y="822.304" width="246.958" height="152.18" />
+  <object id="9" x="520.615" y="822.304" width="361.76" height="169.533" />
+  <object id="10" x="352.416" y="897.059" width="226.935" height="74.7549" />
+  <object id="198" gid="61" x="320" y="832" width="64" height="64" />
+  <object id="199" gid="71" x="320" y="768" width="64" height="64" />
+  <object id="200" gid="71" x="320" y="704" width="64" height="64" />
+  <object id="201" gid="71" x="320" y="640" width="64" height="64" />
+  <object id="202" gid="71" x="320" y="576" width="64" height="64" />
+  <object id="203" gid="71" x="512" y="832" width="64" height="64" />
+  <object id="204" gid="71" x="512" y="768" width="64" height="64" />
+  <object id="205" gid="71" x="512" y="704" width="64" height="64" />
+  <object id="207" gid="71" x="512" y="640" width="64" height="64" />
+  <object id="208" gid="71" x="512" y="576" width="64" height="64" />
+ </objectgroup>
+ <objectgroup id="6" name="Transition">
+  <object id="11" x="389.794" y="816.964" width="114.802" height="34.7076">
+   <properties>
+    <property name="pos" value="room-entrance" />
+    <property name="target" value="world_map" />
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="4" name="Coast" />
+ <objectgroup id="5" name="Entities">
+  <object id="1" name="Player" x="445.86" y="716.846">
+   <properties>
+    <property name="direction" value="top" />
+    <property name="pos" value="house-in" />
+   </properties>
+   <point />
+  </object>
+  <object id="2" name="NPC4" x="463.214" y="433.846">
+   <point />
+  </object>
+ </objectgroup>
+ <objectgroup id="2" name="Objects">
+  <object id="133" gid="693" x="384" y="288" width="32" height="32" />
+  <object id="134" gid="694" x="416" y="288" width="32" height="32" />
+  <object id="135" gid="695" x="448" y="288" width="32" height="32" />
+  <object id="136" gid="708" x="448" y="320" width="32" height="32" />
+  <object id="137" gid="707" x="416" y="320" width="32" height="32" />
+  <object id="138" gid="706" x="384" y="320" width="32" height="32" />
+  <object id="139" gid="752" x="512" y="128" width="32" height="32" />
+  <object id="140" gid="753" x="544" y="128" width="32" height="32" />
+  <object id="141" gid="765" x="512" y="160" width="32" height="32" />
+  <object id="143" gid="766" x="544" y="160" width="32" height="32" />
+  <object id="144" gid="778" x="512" y="192" width="32" height="32" />
+  <object id="145" gid="779" x="544" y="192" width="32" height="32" />
+  <object id="146" gid="792" x="608" y="160" width="32" height="32" />
+  <object id="147" gid="793" x="640" y="160" width="32" height="32" />
+  <object id="148" gid="794" x="672" y="160" width="32" height="32" />
+  <object id="149" gid="795" x="704" y="160" width="32" height="32" />
+  <object id="150" gid="805" x="608" y="192" width="32" height="32" />
+  <object id="151" gid="806" x="640" y="192" width="32" height="32" />
+  <object id="152" gid="807" x="672" y="192" width="32" height="32" />
+  <object id="153" gid="808" x="704" y="192" width="32" height="32" />
+  <object id="154" gid="796" x="752" y="160" width="32" height="32" />
+  <object id="155" gid="797" x="784" y="160" width="32" height="32" />
+  <object id="156" gid="809" x="752" y="192" width="32" height="32" />
+  <object id="157" gid="810" x="784" y="192" width="32" height="32" />
+  <object id="158" gid="817" x="144" y="144" width="32" height="32" />
+  <object id="159" gid="818" x="176" y="144" width="32" height="32" />
+  <object id="160" gid="830" x="144" y="176" width="32" height="32" />
+  <object id="161" gid="831" x="176" y="176" width="32" height="32" />
+  <object id="162" gid="843" x="144" y="208" width="32" height="32" />
+  <object id="163" gid="844" x="176" y="208" width="32" height="32" />
+  <object id="164" gid="819" x="224" y="144" width="32" height="32" />
+  <object id="165" gid="820" x="256" y="144" width="32" height="32" />
+  <object id="166" gid="821" x="288" y="144" width="32" height="32" />
+  <object id="167" gid="822" x="320" y="144" width="32" height="32" />
+  <object id="168" gid="823" x="352" y="144" width="32" height="32" />
+  <object id="169" gid="836" x="352" y="176" width="32" height="32" />
+  <object id="170" gid="849" x="352" y="208" width="32" height="32" />
+  <object id="171" gid="835" x="320" y="176" width="32" height="32" />
+  <object id="172" gid="834" x="288" y="176" width="32" height="32" />
+  <object id="173" gid="833" x="256" y="176" width="32" height="32" />
+  <object id="174" gid="832" x="224" y="176" width="32" height="32" />
+  <object id="175" gid="845" x="224" y="208" width="32" height="32" />
+  <object id="176" gid="846" x="256" y="208" width="32" height="32" />
+  <object id="180" gid="847" x="288" y="208" width="32" height="32" />
+  <object id="181" gid="848" x="320" y="208" width="32" height="32" />
+  <object id="182" gid="813" x="128" y="368" width="32" height="32" />
+  <object id="183" gid="826" x="128" y="400" width="32" height="32" />
+  <object id="184" gid="839" x="128" y="432" width="32" height="32" />
+  <object id="185" gid="852" x="128" y="464" width="32" height="32" />
+  <object id="186" gid="814" x="160" y="368" width="32" height="32" />
+  <object id="187" gid="827" x="160" y="400" width="32" height="32" />
+  <object id="188" gid="840" x="160" y="432" width="32" height="32" />
+  <object id="189" gid="853" x="160" y="464" width="32" height="32" />
+  <object id="190" gid="813" x="128" y="528" width="32" height="32" />
+  <object id="191" gid="826" x="128" y="560" width="32" height="32" />
+  <object id="192" gid="839" x="128" y="592" width="32" height="32" />
+  <object id="193" gid="852" x="128" y="624" width="32" height="32" />
+  <object id="194" gid="853" x="160" y="624" width="32" height="32" />
+  <object id="195" gid="840" x="160" y="592" width="32" height="32" />
+  <object id="196" gid="827" x="160" y="560" width="32" height="32" />
+  <object id="197" gid="814" x="160" y="528" width="32" height="32" />
+  <object id="213" gid="988" x="576" y="128" width="32" height="32" />
+  <object id="214" gid="1001" x="576" y="160" width="32" height="32" />
+  <object id="215" gid="1014" x="576" y="192" width="32" height="32" />
+  <object id="216" gid="991" x="432" y="128" width="32" height="32" />
+  <object id="217" gid="992" x="464" y="128" width="32" height="32" />
+  <object id="218" gid="1004" x="432" y="160" width="32" height="32" />
+  <object id="219" gid="1005" x="464" y="160" width="32" height="32" />
+  <object id="220" gid="1017" x="432" y="192" width="32" height="32" />
+  <object id="221" gid="1018" x="464" y="192" width="32" height="32" />
+  <object id="230" gid="109" x="384.446" y="895.805" width="64" height="64" />
+  <object id="231" gid="110" x="447.686" y="895.893" width="64" height="64" />
+ </objectgroup>
+</map>

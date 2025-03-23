@@ -9,8 +9,9 @@ import xml.etree.ElementTree as ET
 from loaders import load_all_characters, tmx_importer
 from player import Player
 from dialogs import Dialog
-from npcs import Npc
+from npcs import *
 from loaders import load_all_characters
+from npc_engine import call_npc_engine_api
 from settings import *
 from os.path import join
 from settings import *
@@ -153,13 +154,13 @@ class Game:
 				if obj.properties['pos'] == player_start_pos:
 					self.player = Player((obj.x, obj.y), self.frames['characters']['fire_boss'], self.sprites, self.collision_sprites)
 			elif obj.name == 'NPC1':
-				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['hat_girl'], self.sprites, DIALOGUE_1))
+				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['hat_girl'], self.sprites, [], SARAH_NPC))
 			elif obj.name == 'NPC2':
-				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['blond'], self.sprites, DIALOGUE_2))
+				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['blond'], self.sprites, [], ANNA_NPC))
 			elif obj.name == 'NPC3':
-				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['young_guy'], self.sprites, DIALOGUE_3))
+				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['young_guy'], self.sprites, [], JOHN_NPC))
 			elif obj.name == 'NPC4':
-				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['water_boss'], self.sprites, []))
+				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['water_boss'], self.sprites, [], CAROLINE_NPC))
 
 	def on_dialog_end(self):
 		self.dialog = None
@@ -172,6 +173,89 @@ class Game:
 			self.transition_target = sprites[0].target
 			self.tint_mode = 'tint'
 
+	def input(self):
+		keys = pygame.key.get_pressed()
+		if keys[pygame.K_w] and not self.dialog:
+			closest_npc = None
+			min_distance = float('inf')
+
+			player_pos = pygame.math.Vector2(self.player.rect.center)
+			for npc in self.npcs:
+				npc_pos = pygame.math.Vector2(npc.rect.center)
+				distance = player_pos.distance_to(npc_pos)
+
+				if distance < min_distance:
+					min_distance = distance
+					closest_npc = npc
+
+			if closest_npc and min_distance <= 180:
+				if not closest_npc.dialog:
+					closest_npc.dialog = call_npc_engine_api(closest_npc.context['name'], closest_npc.context['desc'], closest_npc.context['last_events'])
+
+				self.dialog = Dialog(self.player, closest_npc, self.sprites, self.fonts['dialog'], self.on_dialog_end)
+				self.player.blocked = True
+
+		if keys[pygame.K_1]:
+			# Good deeds for Sarah
+			self.npcs[0].dialog = None
+			self.npcs[0].context['last_events'] = [
+				"Player completed a quest for Sarah to find a rare artifact that she was looking for for a long time.",
+				"Player helped Sarah when she was attacked by bandits on the road.",
+				"Player saved Sarah's brother's life during a war with enemy kingdom."
+			]
+		elif keys[pygame.K_2]:
+			# Bad deeds for Sarah
+			self.npcs[0].dialog = None
+			self.npcs[0].context['last_events'] = [
+				"Player stole a rare artifact from Sarah and sold it to a local merchant who is Sarah's rival.",
+				"Player denied to complete a quest for Sarah and instead helped her rival to complete the quest.",
+				"Player joined the forces of the enemy country which led to Sarah's brother death in the battle killed by the player."
+			]
+		elif keys[pygame.K_3]:
+			# Good deeds for Anna
+			self.npcs[1].dialog = None
+			self.npcs[1].context['last_events'] = [
+				"Player helped Anna to find a rare ingredient for her new potion.",
+				"Player saved Anna's shop from a fire that was started by a group of bandits.",
+			]
+		elif keys[pygame.K_4]:
+			# Bad deeds for Anna
+			self.npcs[1].dialog = None
+			self.npcs[1].context['last_events'] = [
+				"Player joined rival fraction of alchemists from the other town",
+			]
+		elif keys[pygame.K_5]:
+			# Good and bad deeds for John
+			self.npcs[2].dialog = None
+			self.npcs[2].context['last_events'] = [
+				"Player helped John to find his lost dog.",
+				"Player helped Jogn to clean his house.",
+				"Player stole a small amount of pretty common ore from John's chest.",
+				"Player helped John to find a rare ore in the mine.",
+				"Player lied to John during a trade and sold him a fake magic sword.",
+			]
+		elif keys[pygame.K_6]:
+			# Good deeds for Caroline
+			self.npcs[3].dialog = None
+			self.npcs[3].context['last_events'] = [
+				"Player helped Caroline to find her lost child after he wandered into a dangerous forest.",
+				"Player reunited Caroline with her missing husband, who had been captured by bandits.",
+				"Player rescued Caroline's lost dog from a pack of wolves.",
+				"Player defended Caroline’s farm from raiders trying to steal her livestock.",
+				"Player helped Caroline rebuild her house after a devastating storm.",
+				"Player nursed Caroline back to health after she fell ill with a rare disease.",
+				"Player taught Caroline self-defense so she wouldn’t feel helpless in dangerous situations."
+			]
+		elif keys[pygame.K_7]:
+			# Bad deeds for Caroline
+			self.npcs[3].dialog = None
+			self.npcs[3].context['last_events'] = [
+				"Player stole food from Caroline's farm, leaving her struggling to feed her family."
+				"Player tricked Caroline into selling a family heirloom for a fraction of its value."
+				"Player sabotaged Caroline's chances of receiving aid by spreading false rumors about her."
+				"Player refused to help Caroline find her lost child, even when she begged for assistance."
+			]
+
 	def run(self):
 		while True:
 			dt = self.clock.tick() / 1000
@@ -182,29 +266,7 @@ class Game:
 					pygame.quit()
 					exit()
 
-			# Temporary dialog trigger, it should be moved to better place
-			# First we should check if NPC is in range of player
-			# Second we should check if player is pressing the right key
-			keys = pygame.key.get_pressed()
-			if keys[pygame.K_w] and not self.dialog:
-				closest_npc = None
-				min_distance = float('inf')
-
-				player_pos = pygame.math.Vector2(self.player.rect.center)
-				for npc in self.npcs:
-					if npc and len(npc.dialog) == 0:
-						continue
-
-					npc_pos = pygame.math.Vector2(npc.rect.center)
-					distance = player_pos.distance_to(npc_pos)
-
-					if distance < min_distance:
-						min_distance = distance
-						closest_npc = npc
-
-				if closest_npc and min_distance <= 180:
-					self.dialog = Dialog(self.player, closest_npc, self.sprites, self.fonts['dialog'], self.on_dialog_end)
-					self.player.blocked = True
+			self.input()
 
 			self.transition_check()
 			self.sprites.update(dt)
