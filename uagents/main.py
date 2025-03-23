@@ -2,25 +2,24 @@ import os
 import requests
 import json
 
-from uagents import Agent, Context, Model
-from typing import List, Optional, Dict
+from asi1 import call_asi1_api
 from dotenv import load_dotenv
+from uagents import Agent, Context
+from dtos import Request, Response
 
 load_dotenv()
 
 agent = Agent(
-  name="Sarah NPC",
+  name="NPC Engine",
   port=8000,
-  seed="1158b220-d5e9-454f-a460-e84a857b4321",
+  seed="1158b220-d5e9-454f-a460-e84a857b4327",
   endpoint=["http://127.0.0.1:8000"],
 )
 
 @agent.on_rest_post("/dialogue_tree", Request, Response)
-async def create_dialogue_tree(ctx: Context, req: Request) -> Response:
-  response = await call_csi_api(sarah_npc)  
+async def create_dialogue_tree(_: Context, req: Request) -> Response:
+  response = await call_asi1_api(npc_name=req.npc_name, npc_desc=req.npc_desc, last_events=req.last_events)  
   dialogue = json.loads(response['choices'][0]['message']['content'])
-
-  print(dialogue)
 
   return Response(dialogue=dialogue)
 
