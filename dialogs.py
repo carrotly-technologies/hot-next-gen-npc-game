@@ -21,6 +21,7 @@ class Dialog:
 			self.player_sprite = None
 			self.timer = pygame.time.get_ticks() + 2000
 
+
 	def dispose(self):
 		self.npc_sprite.kill()
 		if self.player_sprite: self.player_sprite.kill()

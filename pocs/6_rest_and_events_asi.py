@@ -1,3 +1,13 @@
+import os
+import requests
+import json
+
+from uagents import Agent, Context, Model
+from typing import List, Optional, Dict
+from dotenv import load_dotenv
+
+load_dotenv()
+
 SYSTEM_PROMPT = """
 You are a game engine for building dynamic conversations with NPCs.
 You are given the task to generate next steps of the dialog based on the user input and what happened previously in the world.
@@ -63,3 +73,128 @@ The character's specific information:
 Last events that happened between the player and the character:
 {last_events}
 """
+
+class NPC:
+  def __init__(self, npc_name: str, npc_description: str, last_events: List[str]):
+    self.npc_name = npc_name
+    self.npc_description = npc_description
+    self.last_events = last_events
+
+npc_name = "Sarah"
+npc_description = """
+- Occupation: Trader
+- Location: Market of Carrotly Town
+- Goal: To sell a rare artifact
+- Description: You are a young merchant known for finding unusual items. Your practical clothes feature small trinkets from your travels. You're friendly but cautious about your valuable items until you trust someone.
+
+Character Background:
+- Former sailor family, chose merchant life
+- Acquired an ancient amulet from the Desert of Whispers
+- Needs gold for northern expedition
+
+Interaction Rules:
+- Respond in first person as Sarah
+- Keep responses concise (2-3 sentences maximum)
+- Start artifact price at 500 Carrotly Coins, negotiable to 350
+- Be vague about the artifact initially
+
+Conditional Responses:
+- Rude player: Become guarded, raise prices
+- Knowledgeable player: Reveal more details
+- Theft attempt: Call guards
+- Trade offer: Consider based on value
+
+World Context:
+- Busy port town market during festival
+- Magic items are rare and regulated
+"""
+
+last_events = [
+  "Player completed a quest for Sarah to find a rare artifact that she was looking for for a long time.",
+  "Player helped Sarah when she was attacked by bandits on the road.",
+  "Player saved Sarah's brother's life during a war with enemy kingdom.",
+]
+  
+sarah_npc = NPC(npc_name=npc_name, npc_description=npc_description, last_events=last_events)
+
+async def call_csi_api(npc: NPC) -> Dict:
+  url = "https://api.asi1.ai/v1/chat/completions"
+
+  payload = json.dumps({
+    "model": "asi1-mini",
+    "messages": [
+      {
+        "role": "system",
+        "content": SYSTEM_PROMPT
+      },
+      {
+        "role": "user",
+        "content":  NPC_PROMPT_TEMPLATE.format(npc_name=npc.npc_name, npc_description=npc.npc_description, last_events="\n".join(npc.last_events))
+      }
+    ],
+    "temperature": 0,
+    "max_tokens": 0
+  })
+
+  headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Authorization': f"Bearer {os.getenv('FETCHAI_API_KEY')}"
+  }
+
+  response = requests.request("POST", url, headers=headers, data=payload)
+  
+  return response.json()
+
+class State:
+  def start_christmas_event(self):
+    pass
+
+  def end_christmas_event(self):
+    pass
+
+state = State()
+
+class Request(Model):
+  npcId: str
+ 
+class DialogueOption(Model):
+  text: str
+  next: Optional[int] = None
+  finish: Optional[bool] = None
+
+class Dialogue(Model):
+  message: str
+  options: Optional[List[DialogueOption]] = None
+  finish: Optional[bool] = None
+
+class Response(Model):
+  dialogue: List[Dialogue]
+
+agent = Agent(
+  name="Sarah NPC",
+  port=8000,
+  seed="1158b220-d5e9-454f-a460-e84a857b4321",
+  endpoint=["http://127.0.0.1:8000"],
+)
+
+@agent.on_rest_post("/dialogue_tree", Request, Response)
+async def create_dialogue_tree(ctx: Context, req: Request) -> Response:
+  response = await call_csi_api(sarah_npc)  
+  dialogue = json.loads(response['choices'][0]['message']['content'])
+
+  print(dialogue)
+
+  return Response(dialogue=dialogue)
+
+@agent.on_event("start_christmas_event")
+async def start_christmas_event(ctx: Context):
+  state.start_christmas_event()
+
+@agent.on_event("end_christmas_event")
+async def end_christmas_event(ctx: Context):
+  state.end_christmas_event()
+
+if __name__ == "__main__":
+  agent.run()
+ 

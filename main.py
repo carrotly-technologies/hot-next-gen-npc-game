@@ -145,14 +145,21 @@ class Game:
 		for obj in tmx_map.get_layer_by_name('Collisions'):
 			BorderSprite((obj.x, obj.y), pygame.Surface((obj.width, obj.height)), self.collision_sprites)
 
+		self.npcs = []
+
 		# entities
 		for obj in tmx_map.get_layer_by_name('Entities'):
 			if obj.name == 'Player':
 				if obj.properties['pos'] == player_start_pos:
 					self.player = Player((obj.x, obj.y), self.frames['characters']['fire_boss'], self.sprites, self.collision_sprites)
 			elif obj.name == 'NPC1':
-				dialog = DIALOGUE_3
-				self.npc = Npc((obj.x, obj.y), self.frames['characters']['hat_girl'], self.sprites, dialog)
+				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['hat_girl'], self.sprites, DIALOGUE_1))
+			elif obj.name == 'NPC2':
+				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['blond'], self.sprites, DIALOGUE_2))
+			elif obj.name == 'NPC3':
+				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['young_guy'], self.sprites, DIALOGUE_3))
+			elif obj.name == 'NPC4':
+				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['water_boss'], self.sprites, []))
 
 	def on_dialog_end(self):
 		self.dialog = None
@@ -179,10 +186,25 @@ class Game:
 			# First we should check if NPC is in range of player
 			# Second we should check if player is pressing the right key
 			keys = pygame.key.get_pressed()
-			if not self.dialog and keys[pygame.K_w]:
-				self.dialog = Dialog(self.player, self.npc, self.sprites, self.fonts['dialog'], self.on_dialog_end)
-				self.player.blocked = True
+			if keys[pygame.K_w] and not self.dialog:
+				closest_npc = None
+				min_distance = float('inf')
 
+				player_pos = pygame.math.Vector2(self.player.rect.center)
+				for npc in self.npcs:
+					if npc and len(npc.dialog) == 0:
+						continue
+
+					npc_pos = pygame.math.Vector2(npc.rect.center)
+					distance = player_pos.distance_to(npc_pos)
+
+					if distance < min_distance:
+						min_distance = distance
+						closest_npc = npc
+
+				if closest_npc and min_distance <= 180:
+					self.dialog = Dialog(self.player, closest_npc, self.sprites, self.fonts['dialog'], self.on_dialog_end)
+					self.player.blocked = True
 
 			self.transition_check()
 			self.sprites.update(dt)
