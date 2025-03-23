@@ -18,3 +18,9 @@ class Dialogue(Model):
 
 class Response(Model):
   dialogue: List[Dialogue]
+
+class AreaRequest(Model):
+  dialogs: List[str]
+
+class AreaResponse(Model):
+  content: str

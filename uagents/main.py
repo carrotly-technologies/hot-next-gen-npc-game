@@ -2,10 +2,10 @@ import os
 import requests
 import json
 
-from asi1 import call_asi1_api
+from asi1 import call_asi1_api, call_asi1_api_with_buildings
 from dotenv import load_dotenv
 from uagents import Agent, Context
-from dtos import Request, Response
+from dtos import Request, Response, AreaRequest, AreaResponse
 
 load_dotenv()
 
@@ -22,6 +22,19 @@ async def create_dialogue_tree(_: Context, req: Request) -> Response:
   dialogue = json.loads(response['choices'][0]['message']['content'])
 
   return Response(dialogue=dialogue)
+
+@agent.on_rest_post("/area", AreaRequest, AreaResponse)
+async def create_dialogue_tree(_: Context, req: AreaRequest) -> AreaResponse:
+
+  response = await call_asi1_api_with_buildings(dialogs=req.dialogs)
+
+
+  print(response['choices'][0]['message']['content'])
+  response_content = response['choices'][0]['message']['content']
+
+
+  csv_string = response_content.strip("```csv").strip("`").strip().replace("\n", ",")
+  return AreaResponse(content=csv_string)
 
 if __name__ == "__main__":
   agent.run()
