@@ -1,23 +1,25 @@
 #!/usr/bin/env python
 
-import asyncio
-import os
-import xml.etree.ElementTree as ET
-from os.path import join
-
 import pygame
-from pygame.constants import SCALED
+import os
+
+import asyncio
+import xml.etree.ElementTree as ET
+
+from os.path import join
 from pygame.math import Vector2
 from pygame.event import get as get_events
 from pygame.display import set_mode, flip
 
 from dialogs import Dialog
 from loaders import load_all_characters, tmx_importer
+from npc_engine import call_npc_engine_api
 from mocks import *
-from npcs import Npc
+from npcs import *
 from player import Player
 from settings import *
 from sprites import Sprites, Sprite, CollidableSprite, BorderSprite, TransitionSprite
+from pygame.constants import SCALED
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
@@ -26,12 +28,14 @@ class Game:
 	def __init__(self):
 		pygame.init()
 		pygame.display.set_caption('Hack of Tomorrow')
-		self.display_surface = set_mode((WIDTH, HEIGHT), flags=SCALED, vsync=1)
+		self.display_surface = pygame.display.set_mode((WIDTH, HEIGHT))
+		self.clock = pygame.time.Clock()
 
 		self.transition_target = None
 		self.tint_surf = pygame.Surface((WIDTH, HEIGHT))
 		self.tint_mode = 'untint'
 		self.tint_progress = 0
+		self.tint_direction = -1
 		self.tint_speed = 600
 
 		self.collision_sprites = pygame.sprite.Group()
@@ -87,21 +91,21 @@ class Game:
 
 		tree.write(output_path)
 
-	async def delayed_patch_and_reload(self, base_path, output_path):
-		await asyncio.sleep(1)
-		self.save_patched_map(base_path, output_path)
-		tmx_map = tmx_importer('data', 'maps')['patched_room_map']
-		self.setup(tmx_map, 'house-in', skipCheck=True)
+	# async def delayed_patch_and_reload(self, base_path, output_path):
+	# 	await asyncio.sleep(1)
+	# 	self.save_patched_map(base_path, output_path)
+	# 	tmx_map = tmx_importer('data', 'maps')['patched_room_map']
+	# 	self.setup(tmx_map, 'house-in', skipCheck=True)
 
 	def setup(self, tmx_map, player_start_pos, skipCheck = False):
 		for group in (self.sprites, self.collision_sprites, self.transition_sprites, self.character_sprites):
 			group.empty()
 
-		if player_start_pos == "house-in" and not skipCheck:
-			base_path = join('data', 'maps', 'room_map.tmx')
-			output_path = join('data', 'maps', 'patched_room_map.tmx')
-			asyncio.create_task(self.delayed_patch_and_reload(base_path, output_path))
-			return
+		# if player_start_pos == "house-in" and not skipCheck:
+		# 	base_path = join('data', 'maps', 'room_map.tmx')
+		# 	output_path = join('data', 'maps', 'patched_room_map.tmx')
+		# 	asyncio.create_task(self.delayed_patch_and_reload(base_path, output_path))
+		# 	return
 
 		for layer in ['Terrain']:
 			for x, y, surf in tmx_map.get_layer_by_name(layer).tiles():
@@ -120,13 +124,20 @@ class Game:
 		for obj in tmx_map.get_layer_by_name('Collisions'):
 			BorderSprite((obj.x, obj.y), pygame.Surface((obj.width, obj.height)), self.collision_sprites)
 
+		self.npcs = []
+
 		for obj in tmx_map.get_layer_by_name('Entities'):
 			if obj.name == 'Player' and obj.properties['pos'] == player_start_pos:
 				self.player = Player((obj.x, obj.y), self.frames['characters']['fire_boss'],
 									 self.sprites, self.collision_sprites)
 			elif obj.name == 'NPC1':
-				dialog = DIALOGUE_3
-				self.npc = Npc((obj.x, obj.y), self.frames['characters']['hat_girl'], self.sprites, dialog)
+				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['hat_girl'], self.sprites, [], SARAH_NPC))
+			elif obj.name == 'NPC2':
+				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['blond'], self.sprites, [], ANNA_NPC))
+			elif obj.name == 'NPC3':
+				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['young_guy'], self.sprites, [], JOHN_NPC))
+			elif obj.name == 'NPC4':
+				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['water_boss'], self.sprites, [], CAROLINE_NPC))
 
 	def on_dialog_end(self):
 		self.dialog = None
@@ -137,6 +148,101 @@ class Game:
 		if sprites:
 			self.transition_target = sprites[0].target
 			self.tint_mode = 'tint'
+
+	def input(self):
+		keys = pygame.key.get_pressed()
+		if keys[pygame.K_w] and not self.dialog:
+			closest_npc = None
+			min_distance = float('inf')
+
+			player_pos = pygame.math.Vector2(self.player.rect.center)
+			for npc in self.npcs:
+				npc_pos = pygame.math.Vector2(npc.rect.center)
+				distance = player_pos.distance_to(npc_pos)
+
+				if distance < min_distance:
+					min_distance = distance
+					closest_npc = npc
+
+			if closest_npc and min_distance <= 180:
+				if not closest_npc.dialog:
+					closest_npc.dialog = call_npc_engine_api(closest_npc.context['name'], closest_npc.context['desc'], closest_npc.context['last_events'])
+
+				self.dialog = Dialog(self.player, closest_npc, self.sprites, self.fonts['dialog'], self.on_dialog_end)
+				self.player.blocked = True
+
+		if keys[pygame.K_1]:
+			# Good deeds for Sarah
+			self.npcs[0].dialog = None
+			self.npcs[0].context['last_events'] = [
+				"Player completed a quest for Sarah to find a rare artifact that she was looking for for a long time.",
+				"Player helped Sarah when she was attacked by bandits on the road.",
+				"Player saved Sarah's brother's life during a war with enemy kingdom."
+			]
+		elif keys[pygame.K_2]:
+			# Bad deeds for Sarah
+			self.npcs[0].dialog = None
+			self.npcs[0].context['last_events'] = [
+				"Player stole a rare artifact from Sarah and sold it to a local merchant who is Sarah's rival.",
+				"Player denied to complete a quest for Sarah and instead helped her rival to complete the quest.",
+				"Player joined the forces of the enemy country which led to Sarah's brother death in the battle killed by the player."
+			]
+		elif keys[pygame.K_3]:
+			# Good deeds for Anna
+			self.npcs[1].dialog = None
+			self.npcs[1].context['last_events'] = [
+				"Player helped Anna to find a rare ingredient for her new potion.",
+				"Player saved Anna's shop from a fire that was started by a group of bandits.",
+			]
+		elif keys[pygame.K_4]:
+			# Bad deeds for Anna
+			self.npcs[1].dialog = None
+			self.npcs[1].context['last_events'] = [
+				"Player joined rival fraction of alchemists from the other town",
+			]
+		elif keys[pygame.K_5]:
+			# Good and bad deeds for John
+			self.npcs[2].dialog = None
+			self.npcs[2].context['last_events'] = [
+				"Player helped John to find his lost dog.",
+				"Player helped John to clean his house.",
+				"Player stole a small amount of pretty common ore from John's chest.",
+				"Player helped John to find a rare ore in the mine.",
+				"Player lied to John during a trade and sold him a fake magic sword.",
+			]
+		elif keys[pygame.K_6]:
+			# Good deeds for Caroline
+			self.npcs[3].dialog = None
+			self.npcs[3].context['last_events'] = [
+				"Player helped Caroline to find her lost child after he wandered into a dangerous forest.",
+				"Player reunited Caroline with her missing husband, who had been captured by bandits.",
+				"Player rescued Caroline's lost dog from a pack of wolves.",
+				"Player defended Caroline’s farm from raiders trying to steal her livestock.",
+				"Player helped Caroline rebuild her house after a devastating storm.",
+				"Player nursed Caroline back to health after she fell ill with a rare disease.",
+				"Player taught Caroline self-defense so she wouldn’t feel helpless in dangerous situations."
+			]
+		elif keys[pygame.K_7]:
+			# Bad deeds for Caroline
+			self.npcs[3].dialog = None
+			self.npcs[3].context['last_events'] = [
+				"Player stole food from Caroline's farm, leaving her struggling to feed her family."
+				"Player tricked Caroline into selling a family heirloom for a fraction of its value."
+				"Player sabotaged Caroline's chances of receiving aid by spreading false rumors about her."
+				"Player refused to help Caroline find her lost child, even when she begged for assistance."
+			]
+		elif keys[pygame.K_8]:
+			self.npcs[0].dialog = DIALOGUE_1
+			self.npcs[1].dialog = DIALOGUE_7
+			self.npcs[2].dialog = DIALOGUE_4
+		elif keys[pygame.K_9]:
+			self.npcs[0].dialog = DIALOGUE_2
+			self.npcs[1].dialog = DIALOGUE_8
+			self.npcs[2].dialog = DIALOGUE_5
+		elif keys[pygame.K_0]:
+			self.npcs[0].dialog = DIALOGUE_3
+			self.npcs[1].dialog = DIALOGUE_9
+			self.npcs[2].dialog = DIALOGUE_6
 
 	def tint_screen(self, dt):
 		if self.tint_mode == 'untint':
@@ -153,17 +259,9 @@ class Game:
 		self.tint_surf.set_alpha(self.tint_progress)
 		self.display_surface.blit(self.tint_surf, (0, 0))
 
-	async def run(self, framerate=60):
-		loop = asyncio.get_event_loop()
-		frame_duration = 1.0 / framerate
-		next_frame = 0.0
-
+	def run(self):
 		while True:
-			now = asyncio.get_running_loop().time()
-			if now < next_frame:
-				await asyncio.sleep(next_frame - now)
-
-			dt = frame_duration
+			dt = self.clock.tick() / 1000
 			self.display_surface.fill('black')
 
 			for event in get_events():
@@ -171,33 +269,18 @@ class Game:
 					pygame.quit()
 					return
 
-			keys = pygame.key.get_pressed()
-			if not self.dialog and keys[pygame.K_w]:
-				self.dialog = Dialog(self.player, self.npc, self.sprites, self.fonts['dialog'], self.on_dialog_end)
-				self.player.blocked = True
+			self.input()
 
 			self.transition_check()
 			self.sprites.update(dt)
 			self.sprites.draw(self.player)
 
-			if self.dialog:
-				self.dialog.update()
+			if self.dialog: self.dialog.update()
+			pygame.display.update()
 
 			self.tint_screen(dt)
-			await loop.run_in_executor(None, flip)
-
-			next_frame = now + frame_duration
-
-
-def load_image(name):
-	path = os.path.join(main_dir, "data", name)
-	return pygame.image.load(path).convert()
-
-
-async def main():
-	game = Game()
-	await game.run()
 
 
 if __name__ == "__main__":
-	asyncio.run(main())
+	game = Game()
+	game.run()
