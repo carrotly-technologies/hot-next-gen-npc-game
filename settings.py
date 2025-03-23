@@ -46,6 +46,10 @@ TILE_SETTINGS = {
         "TableSideBottom": ["82"],
         "TableRightBottomCorner": ["83"],
         "TableRightSide": ["73"],
-        "TableRightTopSize": ["63"]
+        "TableRightTopSize": ["63"],
+		"Entrance": ["230", "231"],
+		"Chimney": ["220", "221", "219", "217", "218", "216"],
+		"Lamp": ["213", "214", "215"],
+		"SofaDirectionRight": ["193", "194", "195", "197", "198", "190", "191"]
     }
 }

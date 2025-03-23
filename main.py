@@ -153,28 +153,28 @@ class Game:
 		self.tint_surf.set_alpha(self.tint_progress)
 		self.display_surface.blit(self.tint_surf, (0, 0))
 
-	async def run(self, framerate=60):
-		loop = asyncio.get_event_loop()
+	async def run(self, event_queue: asyncio.Queue, framerate=60):
 		frame_duration = 1.0 / framerate
-		next_frame = 0.0
+		loop = asyncio.get_event_loop()
 
 		while True:
-			now = asyncio.get_running_loop().time()
-			if now < next_frame:
-				await asyncio.sleep(next_frame - now)
+			start = loop.time()
 
-			dt = frame_duration
-			self.display_surface.fill('black')
-
-			for event in get_events():
+			# Handle all pending events from the queue
+			while not event_queue.empty():
+				event = await event_queue.get()
 				if event.type == pygame.QUIT:
 					pygame.quit()
-					return
+					raise SystemExit
 
-			keys = pygame.key.get_pressed()
-			if not self.dialog and keys[pygame.K_w]:
-				self.dialog = Dialog(self.player, self.npc, self.sprites, self.fonts['dialog'], self.on_dialog_end)
-				self.player.blocked = True
+				# Example input handling
+				if not self.dialog and event.type == pygame.KEYDOWN and event.key == pygame.K_w:
+					self.dialog = Dialog(self.player, self.npc, self.sprites, self.fonts['dialog'], self.on_dialog_end)
+					self.player.blocked = True
+
+			# Update & Draw
+			dt = frame_duration
+			self.display_surface.fill('black')
 
 			self.transition_check()
 			self.sprites.update(dt)
@@ -186,18 +186,34 @@ class Game:
 			self.tint_screen(dt)
 			await loop.run_in_executor(None, flip)
 
-			next_frame = now + frame_duration
+			# Frame limit
+			elapsed = loop.time() - start
+			sleep_time = max(0, frame_duration - elapsed)
+			await asyncio.sleep(sleep_time)
 
 
 def load_image(name):
 	path = os.path.join(main_dir, "data", name)
 	return pygame.image.load(path).convert()
 
+async def pygame_event_loop(event_queue: asyncio.Queue):
+	while True:
+		await asyncio.sleep(0)
+		event = pygame.event.poll()
+		if event.type != pygame.NOEVENT:
+			await event_queue.put(event)
+
+
 
 async def main():
+	event_queue = asyncio.Queue()
 	game = Game()
-	await game.run()
 
+	# Start both the event loop and game loop
+	await asyncio.gather(
+		pygame_event_loop(event_queue),
+		game.run(event_queue)
+	)
 
 if __name__ == "__main__":
 	asyncio.run(main())
