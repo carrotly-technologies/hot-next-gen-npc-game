@@ -3,6 +3,9 @@
 import pygame
 import os
 
+import asyncio
+import xml.etree.ElementTree as ET
+
 from os.path import join
 from pygame.math import Vector2
 from pygame.event import get as get_events
@@ -290,6 +293,10 @@ def load_image(name):
 	return pygame.image.load(path).convert()
 
 
-if __name__ == "__main__":
+async def main():
 	game = Game()
-	game.run()
+	await game.run()
+
+
+if __name__ == "__main__":
+	asyncio.run(main())
