@@ -1,38 +1,38 @@
 #!/usr/bin/env python
 
-import os
-from os.path import join
-
 import pygame
+import os
+import asyncio
 import xml.etree.ElementTree as ET
 
-from loaders import load_all_characters, tmx_importer
-from player import Player
-from dialogs import Dialog
-from npcs import *
-from loaders import load_all_characters
-from npc_engine import call_npc_engine_api
-from settings import *
 from os.path import join
-from settings import *
-from sprites import Sprites, Sprite, CollidableSprite, BorderSprite, AnimatedSprite, TransitionSprite
 from pygame.math import Vector2
+from pygame.event import get as get_events
+from pygame.display import set_mode, flip
+
+from dialogs import Dialog
+from loaders import load_all_characters, tmx_importer
+from npc_engine import call_npc_engine_api
 from mocks import *
+from npcs import *
+from player import Player
+from settings import *
+from sprites import Sprites, Sprite, CollidableSprite, BorderSprite, TransitionSprite
+from pygame.constants import SCALED
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
+
 
 class Game:
 	def __init__(self):
 		pygame.init()
 		pygame.display.set_caption('Hack of Tomorrow')
-		self.display_surface = pygame.display.set_mode((WIDTH, HEIGHT))
-		self.clock = pygame.time.Clock()
+		self.display_surface = set_mode((WIDTH, HEIGHT), flags=SCALED, vsync=1)
 
 		self.transition_target = None
 		self.tint_surf = pygame.Surface((WIDTH, HEIGHT))
 		self.tint_mode = 'untint'
 		self.tint_progress = 0
-		self.tint_direction = -1
 		self.tint_speed = 600
 
 		self.collision_sprites = pygame.sprite.Group()
@@ -43,8 +43,6 @@ class Game:
 		self.dialog = None
 
 		self.load_assets()
-		self.setup(self.tmx_maps['world_map'], 'init')
-
 		self.remixed_map_data = [
 			[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17],
 			[17, 29, 30, 17, 17, 17, 17, 17, 17, 17, 17, 17, 39, 40, 17],
@@ -62,12 +60,11 @@ class Game:
 			[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17],
 			[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17]
 		]
+		self.setup(self.tmx_maps['world_map'], 'init')
 
 	def load_assets(self):
 		self.tmx_maps = tmx_importer('data', 'maps')
-
-		self.frames = { 'characters': load_all_characters('data', 'graphics', 'characters') }
-
+		self.frames = {'characters': load_all_characters('data', 'graphics', 'characters')}
 		self.fonts = {
 			'dialog': pygame.font.Font(join('data', 'graphics', 'fonts', 'PixeloidSans.ttf'), 30),
 			'regular': pygame.font.Font(join('data', 'graphics', 'fonts', 'PixeloidSans.ttf'), 18),
@@ -75,84 +72,61 @@ class Game:
 			'bold': pygame.font.Font(join('data', 'graphics', 'fonts', 'dogicapixelbold.otf'), 20),
 		}
 
-
-	def tint_screen(self, dt):
-		if self.tint_mode == 'untint':
-			self.tint_progress -= self.tint_speed * dt
-
-		if self.tint_mode == 'tint':
-			self.tint_progress += self.tint_speed * dt
-			if self.tint_progress >= 255:
-				if self.transition_target == 'level':
-					self.battle = None
-				else:
-					self.setup(self.tmx_maps[self.transition_target[0]], self.transition_target[1])
-				self.tint_mode = 'untint'
-				self.transition_target = None
-
-		self.tint_progress = max(0, min(self.tint_progress, 255))
-		self.tint_surf.set_alpha(self.tint_progress)
-		self.display_surface.blit(self.tint_surf, (0,0))
-
 	def save_patched_map(self, base_map_path, output_path):
-		# Load the base map from disk
 		tree = ET.parse(base_map_path)
 		root = tree.getroot()
 
-		# Find the terrain layer
 		for layer in root.findall("layer"):
 			if layer.attrib.get("name") == "Terrain":
 				data = layer.find("data")
 				if data is not None:
-					# Convert remixed data to CSV string
 					csv_string = "\n" + ",\n".join(
 						",".join(str(gid) for gid in row) for row in self.remixed_map_data
 					)
 					data.text = csv_string
 					break
 
-		# Save new patched file
 		tree.write(output_path)
 
-	def setup(self, tmx_map, player_start_pos):
-		# clear the map
+	async def delayed_patch_and_reload(self, base_path, output_path):
+		await asyncio.sleep(1)
+		self.save_patched_map(base_path, output_path)
+		tmx_map = tmx_importer('data', 'maps')['patched_room_map']
+		self.setup(tmx_map, 'house-in', skipCheck=True)
+
+	def setup(self, tmx_map, player_start_pos, skipCheck = False):
 		for group in (self.sprites, self.collision_sprites, self.transition_sprites, self.character_sprites):
 			group.empty()
 
-		if player_start_pos == "house-in":
+		if player_start_pos == "house-in" and not skipCheck:
 			base_path = join('data', 'maps', 'room_map.tmx')
 			output_path = join('data', 'maps', 'patched_room_map.tmx')
-			self.save_patched_map(base_path, output_path)
-			tmx_map = tmx_importer('data', 'maps')['patched_room_map']
+			asyncio.create_task(self.delayed_patch_and_reload(base_path, output_path))
+			return
 
-		# terrain
 		for layer in ['Terrain']:
 			for x, y, surf in tmx_map.get_layer_by_name(layer).tiles():
 				Sprite((x * TILE_SIZE, y * TILE_SIZE), surf, self.sprites, WORLD_LAYERS['bg'])
 
-		# objects
 		for obj in tmx_map.get_layer_by_name('Objects'):
 			if obj.name == 'top':
 				Sprite((obj.x, obj.y), obj.image, self.sprites, WORLD_LAYERS['top'])
 			else:
 				CollidableSprite((obj.x, obj.y), obj.image, (self.sprites, self.collision_sprites))
 
-		# transition objects
 		for obj in tmx_map.get_layer_by_name('Transition'):
 			TransitionSprite((obj.x, obj.y), (obj.width, obj.height), (obj.properties['target'], obj.properties['pos']),
 							 self.transition_sprites)
 
-		# collision objects
 		for obj in tmx_map.get_layer_by_name('Collisions'):
 			BorderSprite((obj.x, obj.y), pygame.Surface((obj.width, obj.height)), self.collision_sprites)
 
 		self.npcs = []
 
-		# entities
 		for obj in tmx_map.get_layer_by_name('Entities'):
-			if obj.name == 'Player':
-				if obj.properties['pos'] == player_start_pos:
-					self.player = Player((obj.x, obj.y), self.frames['characters']['fire_boss'], self.sprites, self.collision_sprites)
+			if obj.name == 'Player' and obj.properties['pos'] == player_start_pos:
+				self.player = Player((obj.x, obj.y), self.frames['characters']['fire_boss'],
+									 self.sprites, self.collision_sprites)
 			elif obj.name == 'NPC1':
 				self.npcs.append(Npc((obj.x, obj.y), self.frames['characters']['hat_girl'], self.sprites, [], SARAH_NPC))
 			elif obj.name == 'NPC2':
@@ -169,7 +143,6 @@ class Game:
 	def transition_check(self):
 		sprites = [sprite for sprite in self.transition_sprites if sprite.rect.colliderect(self.player.hitbox)]
 		if sprites:
-			# should block player but you know
 			self.transition_target = sprites[0].target
 			self.tint_mode = 'tint'
 
@@ -256,15 +229,38 @@ class Game:
 				"Player refused to help Caroline find her lost child, even when she begged for assistance."
 			]
 
-	def run(self):
-		while True:
-			dt = self.clock.tick() / 1000
-			self.display_surface.fill('pink')
+	def tint_screen(self, dt):
+		if self.tint_mode == 'untint':
+			self.tint_progress -= self.tint_speed * dt
+		elif self.tint_mode == 'tint':
+			self.tint_progress += self.tint_speed * dt
+			if self.tint_progress >= 255:
+				if self.transition_target:
+					self.setup(self.tmx_maps[self.transition_target[0]], self.transition_target[1])
+				self.tint_mode = 'untint'
+				self.transition_target = None
 
-			for event in pygame.event.get():
+		self.tint_progress = max(0, min(self.tint_progress, 255))
+		self.tint_surf.set_alpha(self.tint_progress)
+		self.display_surface.blit(self.tint_surf, (0, 0))
+
+	async def run(self, framerate=60):
+		loop = asyncio.get_event_loop()
+		frame_duration = 1.0 / framerate
+		next_frame = 0.0
+
+		while True:
+			now = asyncio.get_running_loop().time()
+			if now < next_frame:
+				await asyncio.sleep(next_frame - now)
+
+			dt = frame_duration
+			self.display_surface.fill('black')
+
+			for event in get_events():
 				if event.type == pygame.QUIT:
 					pygame.quit()
-					exit()
+					return
 
 			self.input()
 
@@ -272,15 +268,24 @@ class Game:
 			self.sprites.update(dt)
 			self.sprites.draw(self.player)
 
-			if self.dialog: self.dialog.update()
+			if self.dialog:
+				self.dialog.update()
 
 			self.tint_screen(dt)
-			pygame.display.update()
+			await loop.run_in_executor(None, flip)
+
+			next_frame = now + frame_duration
+
 
 def load_image(name):
-		path = os.path.join(main_dir, "data", name)
-		return pygame.image.load(path).convert()
+	path = os.path.join(main_dir, "data", name)
+	return pygame.image.load(path).convert()
+
+
+async def main():
+	game = Game()
+	await game.run()
+
 
 if __name__ == "__main__":
-		game = Game()
-		game.run()
+	asyncio.run(main())
