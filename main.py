@@ -109,21 +109,21 @@ class Game:
 
 		tree.write(output_path)
 
-	async def delayed_patch_and_reload(self, base_path, output_path):
-		await asyncio.sleep(1)
-		self.save_patched_map(base_path, output_path)
-		tmx_map = tmx_importer('data', 'maps')['patched_room_map']
-		self.setup(tmx_map, 'house-in', skipCheck=True)
+	# async def delayed_patch_and_reload(self, base_path, output_path):
+	# 	await asyncio.sleep(1)
+	# 	self.save_patched_map(base_path, output_path)
+	# 	tmx_map = tmx_importer('data', 'maps')['patched_room_map']
+	# 	self.setup(tmx_map, 'house-in', skipCheck=True)
 
 	def setup(self, tmx_map, player_start_pos, skipCheck = False):
 		for group in (self.sprites, self.collision_sprites, self.transition_sprites, self.character_sprites):
 			group.empty()
 
-		if player_start_pos == "house-in" and not skipCheck:
-			base_path = join('data', 'maps', 'room_map.tmx')
-			output_path = join('data', 'maps', 'patched_room_map.tmx')
-			asyncio.create_task(self.delayed_patch_and_reload(base_path, output_path))
-			return
+		# if player_start_pos == "house-in" and not skipCheck:
+		# 	base_path = join('data', 'maps', 'room_map.tmx')
+		# 	output_path = join('data', 'maps', 'patched_room_map.tmx')
+		# 	asyncio.create_task(self.delayed_patch_and_reload(base_path, output_path))
+		# 	return
 
 		for layer in ['Terrain']:
 			for x, y, surf in tmx_map.get_layer_by_name(layer).tiles():
@@ -223,7 +223,7 @@ class Game:
 			self.npcs[2].dialog = None
 			self.npcs[2].context['last_events'] = [
 				"Player helped John to find his lost dog.",
-				"Player helped Jogn to clean his house.",
+				"Player helped John to clean his house.",
 				"Player stole a small amount of pretty common ore from John's chest.",
 				"Player helped John to find a rare ore in the mine.",
 				"Player lied to John during a trade and sold him a fake magic sword.",
@@ -249,6 +249,18 @@ class Game:
 				"Player sabotaged Caroline's chances of receiving aid by spreading false rumors about her."
 				"Player refused to help Caroline find her lost child, even when she begged for assistance."
 			]
+		elif keys[pygame.K_8]:
+			self.npcs[0].dialog = DIALOGUE_1
+			self.npcs[1].dialog = DIALOGUE_7
+			self.npcs[2].dialog = DIALOGUE_4
+		elif keys[pygame.K_9]:
+			self.npcs[0].dialog = DIALOGUE_2
+			self.npcs[1].dialog = DIALOGUE_8
+			self.npcs[2].dialog = DIALOGUE_5
+		elif keys[pygame.K_0]:
+			self.npcs[0].dialog = DIALOGUE_3
+			self.npcs[1].dialog = DIALOGUE_9
+			self.npcs[2].dialog = DIALOGUE_6
 
 	def tint_screen(self, dt):
 		if self.tint_mode == 'untint':
@@ -265,7 +277,7 @@ class Game:
 		self.tint_surf.set_alpha(self.tint_progress)
 		self.display_surface.blit(self.tint_surf, (0, 0))
 
-	async def run(self):
+	def run(self):
 		while True:
 			dt = self.clock.tick() / 1000
 			self.display_surface.fill('black')
@@ -287,10 +299,6 @@ class Game:
 			self.tint_screen(dt)
 
 
-async def main():
-	game = Game()
-	await game.run()
-
-
 if __name__ == "__main__":
-	asyncio.run(main())
+	game = Game()
+	game.run()
