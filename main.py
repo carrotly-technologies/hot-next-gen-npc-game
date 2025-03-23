@@ -46,7 +46,6 @@ class Game:
 		self.dialog = None
 
 		self.load_assets()
-		self.setup(self.tmx_maps['world_map'], 'init')
 		self.remixed_map_data = [
 			[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17],
 			[17, 29, 30, 17, 17, 17, 17, 17, 17, 17, 17, 17, 39, 40, 17],
@@ -266,15 +265,15 @@ class Game:
 		self.tint_surf.set_alpha(self.tint_progress)
 		self.display_surface.blit(self.tint_surf, (0, 0))
 
-	def run(self):
+	async def run(self):
 		while True:
 			dt = self.clock.tick() / 1000
-			self.display_surface.fill('pink')
+			self.display_surface.fill('black')
 
-			for event in pygame.event.get():
+			for event in get_events():
 				if event.type == pygame.QUIT:
 					pygame.quit()
-					exit()
+					return
 
 			self.input()
 
@@ -286,11 +285,6 @@ class Game:
 			pygame.display.update()
 
 			self.tint_screen(dt)
-
-
-def load_image(name):
-	path = os.path.join(main_dir, "data", name)
-	return pygame.image.load(path).convert()
 
 
 async def main():
