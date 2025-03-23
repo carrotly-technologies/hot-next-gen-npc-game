@@ -75,24 +75,6 @@ class Game:
 			'bold': pygame.font.Font(join('data', 'graphics', 'fonts', 'dogicapixelbold.otf'), 20),
 		}
 
-	def tint_screen(self, dt):
-		if self.tint_mode == 'untint':
-			self.tint_progress -= self.tint_speed * dt
-
-		if self.tint_mode == 'tint':
-			self.tint_progress += self.tint_speed * dt
-			if self.tint_progress >= 255:
-				if self.transition_target == 'level':
-					self.battle = None
-				else:
-					self.setup(self.tmx_maps[self.transition_target[0]], self.transition_target[1])
-				self.tint_mode = 'untint'
-				self.transition_target = None
-
-		self.tint_progress = max(0, min(self.tint_progress, 255))
-		self.tint_surf.set_alpha(self.tint_progress)
-		self.display_surface.blit(self.tint_surf, (0,0))
-
 	def save_patched_map(self, base_map_path, output_path):
 		tree = ET.parse(base_map_path)
 		root = tree.getroot()
