@@ -2,8 +2,6 @@
 
 import pygame
 import os
-import asyncio
-import xml.etree.ElementTree as ET
 
 from os.path import join
 from pygame.math import Vector2
@@ -27,12 +25,14 @@ class Game:
 	def __init__(self):
 		pygame.init()
 		pygame.display.set_caption('Hack of Tomorrow')
-		self.display_surface = set_mode((WIDTH, HEIGHT), flags=SCALED, vsync=1)
+		self.display_surface = pygame.display.set_mode((WIDTH, HEIGHT))
+		self.clock = pygame.time.Clock()
 
 		self.transition_target = None
 		self.tint_surf = pygame.Surface((WIDTH, HEIGHT))
 		self.tint_mode = 'untint'
 		self.tint_progress = 0
+		self.tint_direction = -1
 		self.tint_speed = 600
 
 		self.collision_sprites = pygame.sprite.Group()
@@ -43,6 +43,7 @@ class Game:
 		self.dialog = None
 
 		self.load_assets()
+		self.setup(self.tmx_maps['world_map'], 'init')
 		self.remixed_map_data = [
 			[17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17],
 			[17, 29, 30, 17, 17, 17, 17, 17, 17, 17, 17, 17, 39, 40, 17],
@@ -71,6 +72,24 @@ class Game:
 			'small': pygame.font.Font(join('data', 'graphics', 'fonts', 'PixeloidSans.ttf'), 14),
 			'bold': pygame.font.Font(join('data', 'graphics', 'fonts', 'dogicapixelbold.otf'), 20),
 		}
+
+	def tint_screen(self, dt):
+		if self.tint_mode == 'untint':
+			self.tint_progress -= self.tint_speed * dt
+
+		if self.tint_mode == 'tint':
+			self.tint_progress += self.tint_speed * dt
+			if self.tint_progress >= 255:
+				if self.transition_target == 'level':
+					self.battle = None
+				else:
+					self.setup(self.tmx_maps[self.transition_target[0]], self.transition_target[1])
+				self.tint_mode = 'untint'
+				self.transition_target = None
+
+		self.tint_progress = max(0, min(self.tint_progress, 255))
+		self.tint_surf.set_alpha(self.tint_progress)
+		self.display_surface.blit(self.tint_surf, (0,0))
 
 	def save_patched_map(self, base_map_path, output_path):
 		tree = ET.parse(base_map_path)
@@ -244,23 +263,15 @@ class Game:
 		self.tint_surf.set_alpha(self.tint_progress)
 		self.display_surface.blit(self.tint_surf, (0, 0))
 
-	async def run(self, framerate=60):
-		loop = asyncio.get_event_loop()
-		frame_duration = 1.0 / framerate
-		next_frame = 0.0
-
+	def run(self):
 		while True:
-			now = asyncio.get_running_loop().time()
-			if now < next_frame:
-				await asyncio.sleep(next_frame - now)
+			dt = self.clock.tick() / 1000
+			self.display_surface.fill('pink')
 
-			dt = frame_duration
-			self.display_surface.fill('black')
-
-			for event in get_events():
+			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					pygame.quit()
-					return
+					exit()
 
 			self.input()
 
@@ -268,13 +279,10 @@ class Game:
 			self.sprites.update(dt)
 			self.sprites.draw(self.player)
 
-			if self.dialog:
-				self.dialog.update()
+			if self.dialog: self.dialog.update()
+			pygame.display.update()
 
 			self.tint_screen(dt)
-			await loop.run_in_executor(None, flip)
-
-			next_frame = now + frame_duration
 
 
 def load_image(name):
@@ -282,10 +290,6 @@ def load_image(name):
 	return pygame.image.load(path).convert()
 
 
-async def main():
-	game = Game()
-	await game.run()
-
-
 if __name__ == "__main__":
-	asyncio.run(main())
+	game = Game()
+	game.run()
